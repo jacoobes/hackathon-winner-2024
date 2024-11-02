@@ -15,9 +15,10 @@ export const toggle = (x) => {
 
 
 export class KoreaMap {
-    constructor(app, rectangleSprite) {
+    constructor(app, rectangleSprite, onCityClick) {
         this.app = app;
         this.rectangleSprite = rectangleSprite;
+        this.onCityClick = onCityClick
 
         this.init();
         this.createCityPoints()
@@ -29,8 +30,9 @@ export class KoreaMap {
             { name: "Jeju Island", x: -120, y: 270 }
         ];
 
-        cityPoints.forEach(city => {
+        cityPoints.forEach((city, i) => {
             const pointContainer = new PIXI.Container();
+            pointContainer.name = "pointerContainer"+i
 
             const hitArea = new PIXI.Graphics();
             hitArea.alpha = 0
@@ -49,28 +51,18 @@ export class KoreaMap {
 
             pointContainer.interactive = true;
             pointContainer.buttonMode = true;
-            pointContainer.cursor = "url(/assets/pin.png),auto"
+            pointContainer.cursor = "url('/assets/pin.png'),auto"
             pointContainer.addChild(hitArea);
             pointContainer.addChild(point);
             // Click event listener
-            pointContainer.on('pointerdown', () => this.onCityClick(city.name));
-
+            
+            pointContainer.addEventListener('pointerdown', (e) => this.onCityClick({ event: e, name: city.name }));
             this.korea.addChild(pointContainer);
         });
     }
-
-    onCityClick(name) { 
-       console.log(name) 
-    }
-
+    
     toggleVisibility () { 
         toggle(this.rectangleSprite)
-        if(this.rectangleSprite.visible) {
-            
-        } else {
-
-        }
-        
     }
 
     init() {

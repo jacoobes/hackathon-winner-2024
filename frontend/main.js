@@ -6,6 +6,7 @@ import SplashScreen from './SplashScreen.js'
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js'
 
+
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -79,8 +80,6 @@ const initApp = async () => {
     background: '#1099bb',
     resizeTo: window,
   })
-
-  
 
   document.body.appendChild(app.canvas); // Use app.view to append the canvas
   const splash = new SplashScreen(app, {})
@@ -186,7 +185,19 @@ const initApp = async () => {
                                           height: 500 })
   mapLayer.visible = false;
   mapLayer.anchor.set(0.5)
-  const koreaMap = new KoreaMap(app, mapLayer)
+  const koreaMap = new KoreaMap(app, mapLayer, ({ name, event }) => {
+    switch (name) {
+        case 'Seoul': {
+            onRoomUpdate(layers, 'Seoul')
+        } break;
+        case 'Busan': {
+            onRoomUpdate(layers, 'Busan')
+        } break;
+        case 'Jeju Island': {
+            onRoomUpdate(layers, 'Jeju Island')
+        } break;
+    }
+  })
 
   mapLayer.eventMode  = 'static'
   layers.ui.addChild(mapLayer) 
