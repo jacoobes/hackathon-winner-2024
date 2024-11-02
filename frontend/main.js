@@ -2,7 +2,8 @@ import './style.css';
 import { Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js'
-
+import { onRoomUpdate } from './roomUpdates.js';
+import { createMenu } from './menu.js'
 
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
@@ -17,6 +18,7 @@ function testForAABB(object1, object2)
         && bounds1.y + bounds1.height > bounds2.y
     );
 }
+
 
 function isWithinBounds(character, bounds) {
     const characterBounds = character.getBounds();
@@ -48,7 +50,7 @@ class MainSprite extends Sprite {
 
     }
     moveUp(speed) {
-        this.texture = this.characterTextures.back;
+        this.texture = this.characterTextures.front;
         this.y -= speed;
     }
 
@@ -58,12 +60,12 @@ class MainSprite extends Sprite {
     }
 
     moveLeft(speed) {
-        this.texture = this.characterTextures.left;
+        this.texture = this.characterTextures.front;
         this.x -= speed;
     }
 
     moveRight(speed) {
-        this.texture = this.characterTextures.right;
+        this.texture = this.characterTextures.front;
         this.x += speed;
     }
 }
@@ -86,11 +88,14 @@ const initApp = async () => {
       { alias: 'amogusright', src: '/assets/back_hover.png'}, //change to actual right
       { alias: 'floor', src: '/assets/wood.png' }, //floor
       { alias: 'meat', src: '/assets/meat.png' },
-      { alias: 'mainBackground', src: '/assets/seoultower.png'}
+      { alias: 'mainBackground', src: '/assets/seoultower.png'},
+      { alias: 'background1', src: '/assets/skysunset.png'}
   ])
   
   const layers = {
     background: new Container(),
+    flooring: new Container(),
+    menu: new Container(),
     characters: new Container(),
     ui: new Container()
   }
@@ -99,18 +104,8 @@ const initApp = async () => {
         app.stage.addChild(layer);
   });
 
-  const backgroundSprite = new Sprite(Assets.get('mainBackground'));
-  backgroundSprite.anchor.set(0.5); // Ensure the anchor is at the top-left corner
-  backgroundSprite.position.set(0, 0); // Position it at (0, 0) to cover the screen
-  layers.background.addChild(backgroundSprite);
-
-  const resizeBackground = () => {
-    backgroundSprite.width = window.innerWidth;
-    backgroundSprite.height = window.innerHeight;
-  };
-
-  resizeBackground();
-  window.addEventListener('resize', resizeBackground);
+  createMenu(layers);
+  onRoomUpdate(layers, 'mainBackground');
 
   return { layers, app }
 
@@ -122,7 +117,7 @@ const initApp = async () => {
 
   //initialize floor
   const floorSprite = Sprite.from('floor');
-  layers.background.addChild(floorSprite)
+  layers.flooring.addChild(floorSprite)
 
   let mapBounds;
 
@@ -140,6 +135,8 @@ const initApp = async () => {
 
   layers.background.x = centerX;
   layers.background.y = centerY;
+  layers.flooring.x = centerX;
+  layers.flooring.y = centerY;
 
   for (let row = 0; row < mapRows; row++) {
     for (let col = 0; col < mapCols; col++) {
@@ -148,7 +145,7 @@ const initApp = async () => {
       tileSprite.x = col * tileWidth - (mapCols * tileWidth) / 2 + tileWidth / 2; // Adjust position based on center
       tileSprite.y = row * tileHeight - (mapRows * tileHeight) / 2 + tileHeight / 2; // Adjust position based on center
 
-      layers.background.addChild(tileSprite);
+      layers.flooring.addChild(tileSprite);
     }
   }
 
@@ -161,13 +158,13 @@ const initApp = async () => {
 
   const character = new MainSprite('amogusfront', { app })
   layers.characters.addChild(character);
-  character.position.set(centerX, centerY); //might be unnecessary
+  //character.position.set(centerX, centerY); //might be unnecessary
 
-  const meat = Sprite.from('meat')
+  /*const meat = Sprite.from('meat')
   meat.x = character.x + 50
   meat.scale.set(3)
   meat.y = character.y + 50
-  layers.ui.addChild(meat)
+  layers.ui.addChild(meat)*/
 
   const speed = 24
 
@@ -191,7 +188,7 @@ const initApp = async () => {
             break;
         case ' ': //space key
             for (const ui_el of layers.ui.children) {
-                if(testForAABB(character, ui_el)){ 
+                if(testForAABB(character, ui_el)){
                     onInteract(app, ui_el, "hello")
                 }
             }
@@ -206,6 +203,7 @@ const initApp = async () => {
         character.x = oriX;
         character.y = oriY;
     }
-    
+
   });
+  const menu = createMenu(layers);
 })();
