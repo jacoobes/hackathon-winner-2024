@@ -85,7 +85,8 @@ const initApp = async () => {
       { alias: 'amogusleft', src: '/assets/Red_Amogus.png'}, //change to actual left
       { alias: 'amogusright', src: '/assets/back_hover.png'}, //change to actual right
       { alias: 'floor', src: '/assets/wood.png' }, //floor
-      { alias: 'meat', src: '/assets/meat.png' }
+      { alias: 'meat', src: '/assets/meat.png' },
+      { alias: 'mainBackground', src: '/assets/seoultower.png'}
   ])
   
   const layers = {
@@ -97,6 +98,20 @@ const initApp = async () => {
   Object.values(layers).forEach(layer => {
         app.stage.addChild(layer);
   });
+
+  const backgroundSprite = new Sprite(Assets.get('mainBackground'));
+  backgroundSprite.anchor.set(0.5); // Ensure the anchor is at the top-left corner
+  backgroundSprite.position.set(0, 0); // Position it at (0, 0) to cover the screen
+  layers.background.addChild(backgroundSprite);
+
+  const resizeBackground = () => {
+    backgroundSprite.width = window.innerWidth;
+    backgroundSprite.height = window.innerHeight;
+  };
+
+  resizeBackground();
+  window.addEventListener('resize', resizeBackground);
+
   return { layers, app }
 
 }
@@ -106,7 +121,7 @@ const initApp = async () => {
   const { layers, app } = await initApp();
 
   //initialize floor
-  const floorSprite = new Sprite(Assets.get('floor'));
+  const floorSprite = Sprite.from('floor');
   layers.background.addChild(floorSprite)
 
   let mapBounds;
@@ -120,33 +135,33 @@ const initApp = async () => {
   const mapRows = 10;
   const mapCols = 10;
 
-  const centerX = (app.screen.width - (mapCols * tileWidth)) / 2;
-  const centerY = (app.screen.height - (mapRows * tileHeight)) / 2;
+  const centerX = (app.screen.width/2); //Use these for centering
+  const centerY = (app.screen.height/2); //Use these for centering
 
   layers.background.x = centerX;
   layers.background.y = centerY;
 
   for (let row = 0; row < mapRows; row++) {
     for (let col = 0; col < mapCols; col++) {
-      const tileSprite = new Sprite(Assets.get('floor'));
+      const tileSprite = Sprite.from('floor');
       tileSprite.anchor.set(0.5);
-      tileSprite.x = col * tileWidth + tileWidth / 2;
-      tileSprite.y = row * tileHeight + tileHeight / 2;
+      tileSprite.x = col * tileWidth - (mapCols * tileWidth) / 2 + tileWidth / 2; // Adjust position based on center
+      tileSprite.y = row * tileHeight - (mapRows * tileHeight) / 2 + tileHeight / 2; // Adjust position based on center
 
       layers.background.addChild(tileSprite);
     }
   }
 
   mapBounds = new Rectangle(
-    centerX,
-    centerY,
+    centerX - (mapCols * tileWidth) / 2,
+    centerY - (mapRows * tileHeight) / 2,
     mapCols * tileWidth,
     mapRows * tileHeight
   );
 
   const character = new MainSprite('amogusfront', { app })
   layers.characters.addChild(character);
-
+  character.position.set(centerX, centerY); //might be unnecessary
 
   const meat = Sprite.from('meat')
   meat.x = character.x + 50
