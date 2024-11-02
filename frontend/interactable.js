@@ -3,11 +3,12 @@ import * as PIXI from 'pixi.js';
 //make text bottom
 //truncate 
 //focus using space 
+window.isPopupActive = false; 
 
 export function onInteract(app, ui_el, text) {
   const indent = 10; 
   const popupContainer = new PIXI.Container();
-  popupContainer.interactive = true; // Make the container interactive
+  window.isPopupActive = true; 
   popupContainer.name = "popupContainer"; 
 
   //deletes current popup if another popup is requested
@@ -25,12 +26,12 @@ export function onInteract(app, ui_el, text) {
   popUpBackground.y = (app.screen.height - popUpBackground.height * 1.55);
 
   const popUpStyle = {
-    fontFamily: 'Arial',
-    fontSize: 20,
+    fontFamily: 'Monocraft',
+    fontSize: 18,
     fill: 0x000000,
     align: 'left'
   }
-  const {truncatedText, remainingText} = updatedWrapText(popUpBackground.width - (indent * 5), text, popUpStyle, 4);
+  const {truncatedText, remainingText} = wrapText(popUpBackground.width - (indent * 2), text, popUpStyle, 4);
   const popUpText = new PIXI.Text(truncatedText, popUpStyle);
 
   //positions the text
@@ -43,12 +44,13 @@ export function onInteract(app, ui_el, text) {
 
 // Function to handle keyboard interaction
   const handleKeyDown = (event) => {
-    if (event.key === ' ') {
+    if (event.key == ' ' && window.isPopupActive == true) {
       if (remainingText) {
         app.stage.removeChild(popupContainer);
         onInteract(app, ui_el, remainingText);
       } else {
         app.stage.removeChild(popupContainer); 
+        window.isPopupActive = false; 
       }
     }
   };
@@ -63,36 +65,7 @@ export function onInteract(app, ui_el, text) {
   app.stage.addChild(popupContainer); 
 }
 
-function updatedWrapText(maxWidth, text, style, maxLines) {
-  const letters = text.split(""); // Split text by letter
-  let line = "";
-  let wrappedText = "";
-  let remainingText = "";
-  let lineCount = 0;
-
-  const tempText = new PIXI.Text("", style);
-
-  for (const letter of letters) {
-    const testLine = line + letter;
-    tempText.text = testLine;
-
-    if (tempText.width > maxWidth && line.length > 0) {
-      wrappedText += line + "-\n";
-      line = letter; // Start new line with the current letter
-      lineCount += 1;
-      if (lineCount >= maxLines) {
-        wrappedText = wrappedText.trimEnd() + "...";
-        remainingText = letters.slice(letters.indexOf(letter)).join(""); // Remaining letters
-        return { truncatedText: wrappedText.trimEnd(), remainingText };
-      }
-    } else {
-      line = testLine;
-    }
-  }  
-  wrappedText += line; 
-  return { truncatedText: wrappedText, remainingText }; 
-}
-
+//wraps the text and truncates the text
 function wrapText(maxWidth, text, style, maxLines) {
   const words = text.split(" "); // Split text by letter
   let line = ""; 
@@ -102,17 +75,18 @@ function wrapText(maxWidth, text, style, maxLines) {
 
   const tempText = new PIXI.Text("", style);
 
-  for (const word of words) {
-    const testLine = line + word;
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i]; 
+    const testLine = line + word + " ";
     tempText.text = testLine;
 
     if (tempText.width > maxWidth && line.length > 0) {
-      wrappedText += line + "-\n";
+      wrappedText += line + "\n";
       line = word; // Start new line with the current letter
       lineCount += 1;
       if (lineCount >= maxLines) {
         wrappedText = wrappedText.trimEnd() + "...";
-        remainingText = words.slice(words.indexOf(word)).join(""); // Remaining letters
+        remainingText = words.slice(i).join(" "); // Remaining letters
         return { truncatedText: wrappedText.trimEnd(), remainingText };
       }
     } else {
