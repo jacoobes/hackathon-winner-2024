@@ -1,6 +1,5 @@
 import './style.css';
 import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
-import { Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
 import { createRectangle, toggle , KoreaMap} from './map.js'
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js'
