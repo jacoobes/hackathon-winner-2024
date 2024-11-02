@@ -70,13 +70,15 @@ class MainSprite extends Sprite {
     }
 }
 
-
 const initApp = async () => {
+  await document.fonts.load("10pt 'Monocraft'");
   const app = new Application();
   await app.init({
     background: '#1099bb',
     resizeTo: window,
   })
+
+  
 
   document.body.appendChild(app.canvas); // Use app.view to append the canvas
   const splash = new SplashScreen(app, {})
@@ -220,8 +222,8 @@ const initApp = async () => {
                         break; 
                     }
                     
-                    if(ui_el.uid != mapLayer.uid) {
-                        onInteract(app, ui_el, "hello")
+                    if(ui_el.uid != mapLayer.uid && window.isPopupActive == false) {
+                        onInteract(app, ui_el, "Kimchi is pretty good. It's both rich in flavor and in culture. mmmm kimchi. I could really use some kimchi right now, but i don't really want kimchi. But kimchi sounds so good rn. Maybe next time I'll get some Kimchi to eat. ")
                         break;
                     }
                 }

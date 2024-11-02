@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Monocraft';
+  src: url('../frontend/assets/Font/Monocraft.ttc') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
