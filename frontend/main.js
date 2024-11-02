@@ -1,5 +1,15 @@
 import './style.css';
-import { Application, Assets, Sprite, Container } from 'pixi.js';
+import { Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
+
+function isWithinBounds(character, bounds) {
+    const characterBounds = character.getBounds();
+    return (
+        characterBounds.x >= bounds.x &&
+        characterBounds.x + characterBounds.width <= bounds.x + bounds.width &&
+        characterBounds.y >= bounds.y &&
+        characterBounds.y + characterBounds.height <= bounds.y + bounds.height
+    );
+}
 
 // Create a new PixiJS application
 (async () => {
@@ -14,6 +24,7 @@ import { Application, Assets, Sprite, Container } from 'pixi.js';
     Assets.add({ alias: 'amogus', src: '/assets/xak.png' });
     Assets.add({ alias: 'floor', src: '/assets/wood.png' });
 
+    let mapBounds;
     // Load the floor first
     Assets.load('floor').then(() => {
       // Create a container for the map
@@ -29,7 +40,6 @@ import { Application, Assets, Sprite, Container } from 'pixi.js';
       const centerX = (app.screen.width - (mapCols * tileWidth)) / 2;
       const centerY = (app.screen.height - (mapRows * tileHeight)) / 2;
 
-            // Set the position of the mapContainer to center it
       mapContainer.x = centerX;
       mapContainer.y = centerY;
 
@@ -43,6 +53,12 @@ import { Application, Assets, Sprite, Container } from 'pixi.js';
           mapContainer.addChild(tileSprite);
         }
       }
+      mapBounds = new Rectangle(
+        centerX,
+        centerY,
+        mapCols * tileWidth,
+        mapRows * tileHeight
+      );
 
       // Now load the character sprite
       return Assets.load('amogus');
@@ -62,6 +78,8 @@ import { Application, Assets, Sprite, Container } from 'pixi.js';
 
       // Movement logic
       window.addEventListener('keydown', (event) => {
+        const oriX = character.x;
+        const oriY = character.y;
 
         switch (event.key) {
           case 'ArrowUp':
@@ -76,6 +94,17 @@ import { Application, Assets, Sprite, Container } from 'pixi.js';
           case 'ArrowRight':
             character.x += speed; // Move right
             break;
+        }
+
+        const tempChar = new Sprite(texture);
+        tempChar.x = character.x;
+        tempChar.y = character.y;
+        tempChar.width = character.width;
+        tempChar.height = character.height;
+
+        if (!isWithinBounds(character, mapBounds)) {
+            character.x = oriX;
+            character.y = oriY;
         }
       });
     });
