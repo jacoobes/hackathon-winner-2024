@@ -178,9 +178,9 @@ const initApp = async () => {
 
   const mapLayer = createRectangle(app, { x: centerX,
                                           y: centerY,
-                                          width: 1000,
                                           borderRadius: 50,
                                           outline: { thickness: 6, color: 0x000080 },
+                                          width: 500,
                                           height: 500 })
   mapLayer.visible = false;
   mapLayer.anchor.set(0.5)

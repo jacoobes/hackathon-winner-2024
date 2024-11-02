@@ -13,10 +13,6 @@ export const toggle = (x) => {
 
 }
 
-function onHover () {
-
-}
-
 
 export class KoreaMap {
     constructor(app, rectangleSprite) {
@@ -24,7 +20,49 @@ export class KoreaMap {
         this.rectangleSprite = rectangleSprite;
 
         this.init();
+        this.createCityPoints()
     }
+    createCityPoints() {
+        const cityPoints = [
+            { name: "Seoul", x: -80, y: -220 },
+            { name: "Busan", x: 230, y: 150 },
+            { name: "Jeju Island", x: -120, y: 270 }
+        ];
+
+        cityPoints.forEach(city => {
+            const pointContainer = new PIXI.Container();
+
+            const hitArea = new PIXI.Graphics();
+            hitArea.alpha = 0
+            hitArea.beginFill(0x000000, 0); // Invisible fill
+            hitArea.drawRect(-10, -10, 30, 30); // Rectangle centered around (0,0) with 20x20 size
+            ;
+            hitArea.position.set(city.x, city.y);
+            hitArea.endFill();
+
+            const point = new PIXI.Graphics();
+            point.position.set(city.x, city.y);
+            point.beginFill(0xFF0000); // Red color for the points
+            point.drawCircle(0, 0, 10); // Circle with radius 5
+            point.endFill();
+
+
+            pointContainer.interactive = true;
+            pointContainer.buttonMode = true;
+            pointContainer.cursor = "url(/assets/pin.png),auto"
+            pointContainer.addChild(hitArea);
+            pointContainer.addChild(point);
+            // Click event listener
+            pointContainer.on('pointerdown', () => this.onCityClick(city.name));
+
+            this.korea.addChild(pointContainer);
+        });
+    }
+
+    onCityClick(name) { 
+       console.log(name) 
+    }
+
     toggleVisibility () { 
         toggle(this.rectangleSprite)
         if(this.rectangleSprite.visible) {
@@ -48,7 +86,7 @@ export class KoreaMap {
 
     createOcean() {
         const ocean = createRectangle(this.app, { 
-            x: -250,
+            x: 0,
             y: 0,
             color: 0x2A52BE,
             width: 500,
@@ -66,8 +104,7 @@ export class KoreaMap {
         // Create the sprite
         const korea = PIXI.Sprite.from('korea');
         korea.anchor.set(0.5);
-        korea.scale.set(5);
-        korea.position.set(-250, 0);
+        korea.scale.set(0.8);
 
         this.rectangleSprite.addChild(korea);
         return korea;
@@ -75,13 +112,13 @@ export class KoreaMap {
 
     createCityLabels() {
         const cityData = [
-            { text: "Seoul", x: 100, y: -50 },
-            { text: "Busan", x: 100, y: 0 },
-            { text: "Jeju Island", x: 100, y: 50 }
+            { name: "Seoul", x: -90, y: -220 },
+            { name: "Busan", x: 160, y: 130 },
+            { name: "Jeju Island", x: -120, y: 180 }
         ];
 
         cityData.forEach(city => {
-            const cityLabel = new PIXI.Text(city.text, { fill: 0x000000, fontSize: 16 });
+            const cityLabel = new PIXI.Text(city.name, { fill: 0xFFFFFF, fontSize: 20 });
             cityLabel.position.set(city.x, city.y);
             this.rectangleSprite.addChild(cityLabel);
         });
