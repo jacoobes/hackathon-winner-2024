@@ -1,10 +1,10 @@
 import './style.css';
-import { Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js'
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js'
-
+import { loadSounds, playSound } from './soundfx.js'
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -32,7 +32,7 @@ function isWithinBounds(character, bounds) {
 
 
 // Main character
-class MainSprite extends Sprite { 
+class MainSprite extends Sprite {
     constructor(texture, options) {
         super(Assets.get(texture))
         this.characterTextures = {
@@ -91,7 +91,9 @@ const initApp = async () => {
       { alias: 'mainBackground', src: '/assets/seoultower.png'},
       { alias: 'background1', src: '/assets/skysunset.png'}
   ])
-  
+
+  loadSounds();
+
   const layers = {
     background: new Container(),
     flooring: new Container(),
@@ -158,14 +160,6 @@ const initApp = async () => {
 
   const character = new MainSprite('amogusfront', { app })
   layers.characters.addChild(character);
-  //character.position.set(centerX, centerY); //might be unnecessary
-
-  /*const meat = Sprite.from('meat')
-  meat.x = character.x + 50
-  meat.scale.set(3)
-  meat.y = character.y + 50
-  layers.ui.addChild(meat)*/
-
   const speed = 24
 
   // Movement logic
@@ -176,15 +170,19 @@ const initApp = async () => {
     switch (event.key) {
         case 'ArrowUp':
             character.moveUp(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowDown':
             character.moveDown(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowLeft':
             character.moveLeft(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowRight':
             character.moveRight(speed);
+            playSound('woodsteps');
             break;
         case ' ': //space key
             for (const ui_el of layers.ui.children) {
