@@ -1,0 +1,374 @@
+[
+  {
+    "city": "Seoul",
+    "summary": "A vibrant metropolis blending futuristic skyscrapers with historic palaces and bustling markets.",
+    "food": [
+      "Kimchi",
+      "Bibimbap",
+      "Tteokbokki",
+      "Samgyeopsal",
+      "Korean Fried Chicken"
+    ],
+    "cool_spots": [
+      {
+        "name": "Gyeongbokgung Palace",
+        "description": "The grandest of Seoul's five palaces, dating back to the Joseon Dynasty, with changing of the guard ceremonies and beautiful gardens.",
+        "address": "161 Sajik-ro, Jongno-gu, Seoul",
+        "images": [
+          "GyeongbokgungPalace1",
+          "GyeongbokgungPalace2",
+          "GyeongbokgungPalace3"
+        ],
+        "id": "b17d7f60-746c-44fc-960d-d11616cacc6d"
+      },
+      {
+        "name": "Bukchon Hanok Village",
+        "description": "A charming area with traditional Korean houses, or hanoks, giving visitors a glimpse of Seoul\u00e2\u20ac\u2122s past amid beautiful alleyways and cafes.",
+        "address": "37 Gyedong-gil, Jongno-gu, Seoul",
+        "images": [
+          "BukchonHanokVillage1",
+          "BukchonHanokVillage2",
+          "BukchonHanokVillage3"
+        ],
+        "id": "29d2fc48-57b1-4826-81a4-bcd86a4366d6"
+      },
+      {
+        "name": "N Seoul Tower (Namsan Tower)",
+        "description": "A landmark on Mount Namsan with panoramic views, love locks, and an observation deck that lights up at night.",
+        "address": "105 Namsangongwon-gil, Yongsan-gu, Seoul",
+        "images": [
+          "NSeoulTower1",
+          "NSeoulTower2",
+          "NSeoulTower3"
+        ],
+        "id": "b09e40dd-1380-4517-b07f-0e5c1c8a97d9"
+      },
+      {
+        "name": "Myeongdong",
+        "description": "A bustling shopping district with countless stores, street food vendors, and skincare shops; it\u00e2\u20ac\u2122s a must for fashion and food lovers.",
+        "address": "Myeongdong 1(il)-ga, Jung-gu, Seoul",
+        "images": [
+          "Myeongdong1",
+          "Myeongdong2",
+          "Myeongdong3"
+        ],
+        "id": "3f513cba-e34e-47f4-82b3-42ae0a705158"
+      },
+      {
+        "name": "Dongdaemun Design Plaza (DDP)",
+        "description": "A stunning architectural marvel with exhibitions, cultural events, and LED roses that light up at night.",
+        "address": "281 Eulji-ro, Jung-gu, Seoul",
+        "images": [
+          "DongdaemunDesignPlaza1",
+          "DongdaemunDesignPlaza2",
+          "DongdaemunDesignPlaza3"
+        ],
+        "id": "3f125086-9006-4a11-9f68-784a17855a0a"
+      },
+      {
+        "name": "Insadong",
+        "description": "Known for its traditional tea houses, art galleries, and handicraft shops, this neighborhood is perfect for experiencing Korean culture.",
+        "address": "Insadong-gil, Jongno-gu, Seoul",
+        "images": [
+          "Insadong1",
+          "Insadong2",
+          "Insadong3"
+        ],
+        "id": "c8ed98e0-5f5f-4bad-90f5-ba896b221058"
+      },
+      {
+        "name": "Hongdae",
+        "description": "A trendy, youthful district near Hongik University known for its street art, cafes, live music, and nightlife.",
+        "address": "Hongik University, Mapo-gu, Seoul",
+        "images": [
+          "Hongdae1",
+          "Hongdae2",
+          "Hongdae3"
+        ],
+        "id": "913f5aea-8b99-4938-978e-b6ef7bf87f7f"
+      },
+      {
+        "name": "Cheonggyecheon Stream",
+        "description": "An urban stream in downtown Seoul, offering a peaceful walk with art installations, bridges, and seasonal decorations.",
+        "address": "Cheonggyecheon-ro, Jongno-gu, Seoul",
+        "images": [
+          "CheonggyecheonStream1",
+          "CheonggyecheonStream2",
+          "CheonggyecheonStream3"
+        ],
+        "id": "083f785a-ec38-4efe-a993-e7d15ad6e65e"
+      },
+      {
+        "name": "Lotte World Tower",
+        "description": "Korea\u00e2\u20ac\u2122s tallest building, featuring the Sky Deck, luxury shopping, and world-class dining with views from the top floors.",
+        "address": "300 Olympic-ro, Songpa-gu, Seoul",
+        "images": [
+          "LotteWorldTower1",
+          "LotteWorldTower2",
+          "LotteWorldTower3"
+        ],
+        "id": "b18e39d5-e942-44ef-a776-e487078b404e"
+      },
+      {
+        "name": "Bongeunsa Temple",
+        "description": "A serene Buddhist temple in the middle of Gangnam, offering temple-stay programs and meditation classes.",
+        "address": "531 Bongeunsa-ro, Gangnam-gu, Seoul",
+        "images": [
+          "BongeunsaTemple1",
+          "BongeunsaTemple2",
+          "BongeunsaTemple3"
+        ],
+        "id": "9efb4f1e-ca20-44c7-8f0d-7a316a0377b8"
+      }
+    ],
+    "id": "f6d1a759-4f92-4b15-bfff-02dab7e5dc72"
+  },
+  {
+    "city": "Busan",
+    "summary": "A coastal city known for its stunning beaches, seafood markets, and vibrant festivals.",
+    "food": [
+      "Sashimi (Hoe)",
+      "Grilled Eel (Jangeo-gui)",
+      "Busan-style Dwaeji Gukbap",
+      "Korean-style BBQ",
+      "Bindaetteok (Mung Bean Pancakes)"
+    ],
+    "cool_spots": [
+      {
+        "name": "Haeundae Beach",
+        "description": "Korea\u00e2\u20ac\u2122s most famous beach, perfect for swimming, relaxing, and water sports. In the summer, it's a lively hotspot with events and festivals.",
+        "address": "Haeundae, Busan",
+        "images": [
+          "HaeundaeBeach1",
+          "HaeundaeBeach2",
+          "HaeundaeBeach3"
+        ],
+        "id": "af6d47de-eb25-4db5-b172-5d75e21581db"
+      },
+      {
+        "name": "Gamcheon Culture Village",
+        "description": "Known as the 'Santorini of Korea,' this colorful hillside village features vibrant murals, quirky art installations, and charming alleyways.",
+        "address": "Gamcheon-dong, Saha-gu, Busan",
+        "images": [
+          "GamcheonCultureVillage1",
+          "GamcheonCultureVillage2",
+          "GamcheonCultureVillage3"
+        ],
+        "id": "efc40630-47ff-4d53-97b3-a22eb393c288"
+      },
+      {
+        "name": "Jagalchi Fish Market",
+        "description": "Korea's largest seafood market, where you can enjoy fresh seafood dishes, sashimi, and interact with local fishmongers.",
+        "address": "52 Jagalchihaean-ro, Jung-gu, Busan",
+        "images": [
+          "JagalchiFishMarket1",
+          "JagalchiFishMarket2",
+          "JagalchiFishMarket3"
+        ],
+        "id": "f41513c5-8f98-4ab5-8b21-744a151274ee"
+      },
+      {
+        "name": "Gwangalli Beach",
+        "description": "A popular beach with stunning views of Gwangan Bridge, which lights up beautifully at night. The area is filled with cafes, bars, and restaurants.",
+        "address": "Gwangalli, Suyeong-gu, Busan",
+        "images": [
+          "GwangalliBeach1",
+          "GwangalliBeach2",
+          "GwangalliBeach3"
+        ],
+        "id": "9f08b2ef-a01d-48cc-b006-c712d92c9899"
+      },
+      {
+        "name": "Beomeosa Temple",
+        "description": "A historic Buddhist temple nestled in the mountains, offering peaceful trails, beautiful architecture, and a traditional temple-stay experience.",
+        "address": "Beomeosa-ro 250, Geumjeong-gu, Busan",
+        "images": [
+          "BeomeosaTemple1",
+          "BeomeosaTemple2",
+          "BeomeosaTemple3"
+        ],
+        "id": "280b2e77-05d0-4bd4-b62a-5f411260417c"
+      },
+      {
+        "name": "Taejongdae Resort Park",
+        "description": "A natural park on a cliff-lined coast with panoramic views of the sea, forests, and a scenic lighthouse overlooking rocky cliffs.",
+        "address": "Taejongdae 1-gil, Dongnae-gu, Busan",
+        "images": [
+          "TaejongdaeResortPark1",
+          "TaejongdaeResortPark2",
+          "TaejongdaeResortPark3"
+        ],
+        "id": "a0148d03-0a2b-4620-9247-98a1c2978001"
+      },
+      {
+        "name": "Busan Cinema Center",
+        "description": "An architectural gem and the main venue for the Busan International Film Festival (BIFF), featuring cultural events, performances, and open-air screenings.",
+        "address": "1200 Busandaehak-ro, Haeundae-gu, Busan",
+        "images": [
+          "BusanCinemaCenter1",
+          "BusanCinemaCenter2",
+          "BusanCinemaCenter3"
+        ],
+        "id": "238eaedd-fa5e-4f4f-96d9-86252403a474"
+      },
+      {
+        "name": "Shinsegae Centum City",
+        "description": "The world\u00e2\u20ac\u2122s largest department store, located in Haeundae. It includes a spa, ice rink, golf range, and extensive shopping options.",
+        "address": "35 Centum 1-ro, Haeundae-gu, Busan",
+        "images": [
+          "ShinsegaeCentumCity1",
+          "ShinsegaeCentumCity2",
+          "ShinsegaeCentumCity3"
+        ],
+        "id": "0f9e5155-4e31-4fb3-bbee-bc13667e47f0"
+      },
+      {
+        "name": "Haedong Yonggungsa Temple",
+        "description": "A rare seaside temple with stunning ocean views, beautiful pagodas, and serene meditation spots on a cliff above the water.",
+        "address": "Ilgwang-dong, Gijang-gun, Busan",
+        "images": [
+          "HaedongYonggungsaTemple1",
+          "HaedongYonggungsaTemple2",
+          "HaedongYonggungsaTemple3"
+        ],
+        "id": "da876880-2abe-494b-afcc-67ab805c423a"
+      },
+      {
+        "name": "Songdo Beach & Songdo Skywalk",
+        "description": "A quieter beach with a transparent skywalk that stretches out over the ocean, offering unique views of the waves below.",
+        "address": "Songdo 2(i)-dong, Seo-gu, Busan",
+        "images": [
+          "SongdoBeach&SongdoSkywalk1",
+          "SongdoBeach&SongdoSkywalk2",
+          "SongdoBeach&SongdoSkywalk3"
+        ],
+        "id": "f0a1ca3c-b98d-4f03-a8b9-0b4b3afe4d22"
+      }
+    ],
+    "id": "f4dbef2c-de69-4c83-8a72-9ec7c0682494"
+  },
+  {
+    "city": "Jeju Island",
+    "summary": "A popular getaway island celebrated for its volcanic landscapes, waterfalls, and serene beaches.",
+    "food": [
+      "Black Pork (Heuk Dwaeji)",
+      "Abalone (Jeonbok)",
+      "Jeju Tangerines",
+      "Seaweed Soup (Miyeok-guk)",
+      "Hallabong Orange"
+    ],
+    "cool_spots": [
+      {
+        "name": "Hallasan Mountain",
+        "description": "South Korea\u00e2\u20ac\u2122s highest peak, featuring beautiful hiking trails, crater lakes, and diverse plant life, especially stunning in autumn.",
+        "address": "Hallasan, Jeju",
+        "images": [
+          "HallasanMountain1",
+          "HallasanMountain2",
+          "HallasanMountain3"
+        ],
+        "id": "261423e7-a5ff-4fad-9198-4eb7effd2624"
+      },
+      {
+        "name": "Seongsan Ilchulbong (Sunrise Peak)",
+        "description": "A UNESCO World Heritage site and volcanic tuff cone with incredible sunrise views, green cliffs, and a popular spot for coastal walks.",
+        "address": "Seongsan-ri, Seogwipo, Jeju",
+        "images": [
+          "SeongsanIlchulbong1",
+          "SeongsanIlchulbong2",
+          "SeongsanIlchulbong3"
+        ],
+        "id": "294fc96b-2fde-45eb-a1bb-a498f0181bae"
+      },
+      {
+        "name": "Jeongbang Waterfall",
+        "description": "One of the few waterfalls in Asia that falls directly into the ocean, offering a beautiful spot for photos and a refreshing mist on hot days.",
+        "address": "Jeongbang-ro, Seogwipo, Jeju",
+        "images": [
+          "JeongbangWaterfall1",
+          "JeongbangWaterfall2",
+          "JeongbangWaterfall3"
+        ],
+        "id": "5b974eac-831b-4608-b3cc-3731ffc68d1a"
+      },
+      {
+        "name": "Manjanggul Cave",
+        "description": "One of the world\u00e2\u20ac\u2122s longest lava tubes and a UNESCO site, this impressive cave features unique rock formations, stalagmites, and lava flows.",
+        "address": "Manjanggul, Jeju",
+        "images": [
+          "ManjanggulCave1",
+          "ManjanggulCave2",
+          "ManjanggulCave3"
+        ],
+        "id": "fa6202cc-4a8d-4855-9948-23d67ccd8ab4"
+      },
+      {
+        "name": "Udo Island",
+        "description": "A small, charming island off Jeju\u00e2\u20ac\u2122s coast, known for its white sandy beaches, coral reefs, and delicious peanut ice cream. Perfect for a day trip with bike rentals and scenic spots.",
+        "address": "Udo, Jeju",
+        "images": [
+          "UdoIsland1",
+          "UdoIsland2",
+          "UdoIsland3"
+        ],
+        "id": "1b117202-61eb-4a9c-89a1-cb1116584eb8"
+      },
+      {
+        "name": "Cheonjeyeon Waterfalls",
+        "description": "A series of three-tiered waterfalls surrounded by lush vegetation, and a nearby scenic bridge shaped like seven nymphs based on local legend.",
+        "address": "Cheonjeyeon-ro, Seogwipo, Jeju",
+        "images": [
+          "CheonjeyeonWaterfalls1",
+          "CheonjeyeonWaterfalls2",
+          "CheonjeyeonWaterfalls3"
+        ],
+        "id": "1fbadeb0-f9e4-47b8-864d-b548b8cf0995"
+      },
+      {
+        "name": "Jeju Loveland",
+        "description": "A quirky outdoor sculpture park themed around love and sexuality, filled with humorous and unique art installations.",
+        "address": "2884-5, 1100-ro, Jeju",
+        "images": [
+          "JejuLoveland1",
+          "JejuLoveland2",
+          "JejuLoveland3"
+        ],
+        "id": "873cd606-ae11-46e7-8651-bcd2be88336b"
+      },
+      {
+        "name": "Seopjikoji Coast",
+        "description": "A scenic coastal walk with volcanic rock formations, a lighthouse, and fields of wildflowers. It\u00e2\u20ac\u2122s especially beautiful in spring with yellow canola flowers.",
+        "address": "Seopjikoji, Jeju",
+        "images": [
+          "SeopjikojiCoast1",
+          "SeopjikojiCoast2",
+          "SeopjikojiCoast3"
+        ],
+        "id": "f5acf979-4b2e-4314-ae21-b71ce0dbc693"
+      },
+      {
+        "name": "O\u00e2\u20ac\u2122sulloc Tea Museum",
+        "description": "A popular tea museum and caf\u00c3\u00a9 surrounded by green tea fields, offering insight into Korean tea culture and delicious green tea treats.",
+        "address": "124, 1100-ro, Jeju",
+        "images": [
+          "OsullocTeaMuseum1",
+          "OsullocTeaMuseum2",
+          "OsullocTeaMuseum3"
+        ],
+        "id": "1a289873-e2b9-4f3d-8885-835c39e52229"
+      },
+      {
+        "name": "Spirited Garden",
+        "description": "A beautiful bonsai garden showcasing traditional Korean landscaping and offering a serene space to relax amidst carefully curated greenery.",
+        "address": "108, 1100-ro, Jeju",
+        "images": [
+          "SpiritedGarden1",
+          "SpiritedGarden2",
+          "SpiritedGarden3"
+        ],
+        "id": "613a0e39-3edc-4517-ab3c-b648ee6a65ac"
+      }
+    ],
+    "id": "5c568d80-fab9-4d78-a235-eebddc3fac0a"
+  }
+]
