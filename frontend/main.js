@@ -92,6 +92,20 @@ function isWithinBounds(character, bounds) {
           case 'ArrowLeft':
             character.x -= speed; // Move left
             break;
+        case 'ArrowRight':
+            character.moveRight(speed);
+            break;
+        case ' ': //space key
+            for (const ui_el of layers.ui.children) {
+                if(testForAABB(character, ui_el)){ 
+                    onInteract(app, ui_el, "This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because This text needs to be wrapped severely bad because"); 
+                }
+            }
+            //if item nearby
+            // open menu
+            break;
+        default:
+            console.log(event.key)
           case 'ArrowRight':
             character.x += speed; // Move right
             break;

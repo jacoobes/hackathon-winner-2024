@@ -1,47 +1,126 @@
 import * as PIXI from 'pixi.js';
 
-export function onInteract(event, app, text) {
-  const sprite = event.currentTarget; 
+//make text bottom
+//truncate 
+//focus using space 
+
+export function onInteract(app, ui_el, text) {
+  const indent = 10; 
+  const popupContainer = new PIXI.Container();
+  popupContainer.interactive = true; // Make the container interactive
+  popupContainer.name = "popupContainer"; 
+
+  //deletes current popup if another popup is requested
+  const existingPopup = app.stage.getChildByName("popupContainer"); 
+  if (existingPopup) {
+    app.stage.removeChild(existingPopup); 
+  }
 
   const popUpBackground = new PIXI.Graphics();
   popUpBackground.beginFill(0x000000, 0.9); // Semi-transparent black
-  popUpBackground.drawRoundedRect(0, 0, 250, 100, 10); // Width, height, and rounded corners
+  popUpBackground.drawRoundedRect(0, 0, app.screen.width * 0.92, 100, 10); // Width, height, and rounded corners
   popUpBackground.endFill();
+  popUpBackground.name = "popupBackground"; 
   popUpBackground.x = (app.screen.width - popUpBackground.width) / 2;
-  popUpBackground.y = (app.screen.height - popUpBackground.height) / 2;
+  popUpBackground.y = (app.screen.height - popUpBackground.height * 1.55);
 
-  const popUpText = new PIXI.Text(text, {
-    fontFamily: 'Arial', 
-    fontSize: 20, 
-    fill: 0x000000, 
-    align: 'center', 
-  }); 
+  const popUpStyle = {
+    fontFamily: 'Arial',
+    fontSize: 20,
+    fill: 0x000000,
+    align: 'left'
+  }
+  const {truncatedText, remainingText} = updatedWrapText(popUpBackground.width - (indent * 5), text, popUpStyle, 4);
+  const popUpText = new PIXI.Text(truncatedText, popUpStyle);
 
   //positions the text
-  popUpText.x = (app.screen.width - popUpText.width) / 2; 
-  popUpText.y = (app.screen.height - popUpText.height) / 2; 
-
-  // Create the "X" close button
-  const closeButton = new PIXI.Text("X", {
-    fontFamily: 'Arial',
-    fontSize: 24,
-    fill: 0xff0000, // Red color for the close button
-    align: 'center',
-  });
-  closeButton.interactive = true;
-  closeButton.buttonMode = true; // Makes the cursor look like a pointer on hover
-  closeButton.x = popUpBackground.x + popUpBackground.width - closeButton.width - 10;
-  closeButton.y = popUpBackground.y + 5;
+  popUpText.x = (popUpBackground.x + indent) ; 
+  popUpText.y = (app.screen.height - popUpBackground.height * 1.5);
   
-  // Add the click event to the "X" button to close the pop-up
-  closeButton.on('pointerdown', () => {
-    app.stage.removeChild(popUpBackground);
-    app.stage.removeChild(popUpText);
-    app.stage.removeChild(closeButton);
+  // Add the pop-up elements to the container
+  popupContainer.addChild(popUpBackground);
+  popupContainer.addChild(popUpText);
+
+// Function to handle keyboard interaction
+  const handleKeyDown = (event) => {
+    if (event.key === ' ') {
+      if (remainingText) {
+        app.stage.removeChild(popupContainer);
+        onInteract(app, ui_el, remainingText);
+      } else {
+        app.stage.removeChild(popupContainer); 
+      }
+    }
+  };
+  // Add event listener for space key
+  window.addEventListener('keydown', handleKeyDown);
+
+  // Clean up on removing popup
+  popupContainer.on('removed', () => {
+  window.removeEventListener('keydown', handleKeyDown);
   });
 
-  // Add the pop-up elements to the stage
-  app.stage.addChild(popUpBackground);
-  app.stage.addChild(popUpText);
-  app.stage.addChild(closeButton);
+  app.stage.addChild(popupContainer); 
 }
+
+function updatedWrapText(maxWidth, text, style, maxLines) {
+  const letters = text.split(""); // Split text by letter
+  let line = "";
+  let wrappedText = "";
+  let remainingText = "";
+  let lineCount = 0;
+
+  const tempText = new PIXI.Text("", style);
+
+  for (const letter of letters) {
+    const testLine = line + letter;
+    tempText.text = testLine;
+
+    if (tempText.width > maxWidth && line.length > 0) {
+      wrappedText += line + "-\n";
+      line = letter; // Start new line with the current letter
+      lineCount += 1;
+      if (lineCount >= maxLines) {
+        wrappedText = wrappedText.trimEnd() + "...";
+        remainingText = letters.slice(letters.indexOf(letter)).join(""); // Remaining letters
+        return { truncatedText: wrappedText.trimEnd(), remainingText };
+      }
+    } else {
+      line = testLine;
+    }
+  }  
+  wrappedText += line; 
+  return { truncatedText: wrappedText, remainingText }; 
+}
+
+function wrapText(maxWidth, text, style, maxLines) {
+  const words = text.split(" "); // Split text by letter
+  let line = ""; 
+  let wrappedText = "";
+  let remainingText = "";
+  let lineCount = 0;
+
+  const tempText = new PIXI.Text("", style);
+
+  for (const word of words) {
+    const testLine = line + word;
+    tempText.text = testLine;
+
+    if (tempText.width > maxWidth && line.length > 0) {
+      wrappedText += line + "-\n";
+      line = word; // Start new line with the current letter
+      lineCount += 1;
+      if (lineCount >= maxLines) {
+        wrappedText = wrappedText.trimEnd() + "...";
+        remainingText = words.slice(words.indexOf(word)).join(""); // Remaining letters
+        return { truncatedText: wrappedText.trimEnd(), remainingText };
+      }
+    } else {
+      line = testLine;
+    }
+  }  
+  wrappedText += line; 
+  return { truncatedText: wrappedText, remainingText}; 
+}
+
+
