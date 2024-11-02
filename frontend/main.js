@@ -1,5 +1,6 @@
 import './style.css';
 import { Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
+import { onInteract } from './interactable.js';
 
 function isWithinBounds(character, bounds) {
     const characterBounds = character.getBounds();
