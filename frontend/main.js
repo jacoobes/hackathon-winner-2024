@@ -1,10 +1,13 @@
 import './style.css';
-import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle } from 'pixi.js';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
+import { Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
+import { createRectangle, toggle , KoreaMap} from './map.js'
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js'
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js'
 import { loadSounds, playSound } from './soundfx.js'
+
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -37,9 +40,9 @@ class MainSprite extends Sprite {
         super(Assets.get(texture))
         this.characterTextures = {
             front : Assets.get('amogusfront'),
-            back : Assets.get('amogusback'),
-            left : Assets.get('amogusleft'),
-            right : Assets.get('amogusright'),
+            back : Assets.get('amogusfront'),
+            left : Assets.get('amogusfront'),
+            right : Assets.get('amogusfront'),
         };
         this.anchor.set(0.5);
         this.x = options.app.screen.width / 2;
@@ -47,6 +50,7 @@ class MainSprite extends Sprite {
         this.scale.set(3.0);
         this.eventMode = 'static';
         this.cursor = 'pointer';
+        Assets.get(texture).baseTexture.scaleMode = SCALE_MODES.NEAREST
 
     }
     moveUp(speed) {
@@ -82,6 +86,7 @@ const initApp = async () => {
   const splash = new SplashScreen(app, {})
 
   await splash.loadAssets([ 
+      { alias: 'korea', src: '/assets/korea.png' },
       { alias: 'amogusfront', src: '/assets/xak.png' },
       { alias: 'amogusback', src: '/assets/gojodrink.png'}, //change to actual back
       { alias: 'amogusleft', src: '/assets/Red_Amogus.png'}, //change to actual left
@@ -160,8 +165,35 @@ const initApp = async () => {
 
   const character = new MainSprite('amogusfront', { app })
   layers.characters.addChild(character);
-  const speed = 24
+  //character.position.set(centerX, centerY); //might be unnecessary
 
+  /*const meat = Sprite.from('meat')
+  meat.x = character.x + 50
+  meat.scale.set(3)
+  meat.y = character.y + 50
+  layers.ui.addChild(meat)*/
+
+  const table = Sprite.from('meat')
+  table.x = app.view.width / 2
+  table.y =  app.view.height - mapBounds.height 
+  table.anchor.set(0.5)
+  layers.ui.addChild(table)
+
+  const mapLayer = createRectangle(app, { x: centerX,
+                                          y: centerY,
+                                          width: 1000,
+                                          borderRadius: 50,
+                                          outline: { thickness: 6, color: 0x000080 },
+                                          height: 500 })
+  mapLayer.visible = false;
+  mapLayer.anchor.set(0.5)
+  const koreaMap = new KoreaMap(app, mapLayer)
+
+  mapLayer.eventMode  = 'static'
+  layers.ui.addChild(mapLayer) 
+
+  const speed = 24
+  
   // Movement logic
   window.addEventListener('keydown', (event) => {
     const oriX = character.x;
@@ -186,8 +218,17 @@ const initApp = async () => {
             break;
         case ' ': //space key
             for (const ui_el of layers.ui.children) {
-                if(testForAABB(character, ui_el)){
-                    onInteract(app, ui_el, "hello")
+              
+                if(testForAABB(character, ui_el)){ 
+                    if(ui_el.uid == table.uid) {
+                        koreaMap.toggleVisibility()
+                        break; 
+                    }
+                    
+                    if(ui_el.uid != mapLayer.uid) {
+                        onInteract(app, ui_el, "hello")
+                        break;
+                    }
                 }
             }
             //if item nearby
