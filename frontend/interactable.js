@@ -1,8 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-export function onInteract(event, app, text) {
-  const sprite = event.currentTarget; 
-
+export function onInteract(app, ui_el, text) {
   const popUpBackground = new PIXI.Graphics();
   popUpBackground.beginFill(0x000000, 0.9); // Semi-transparent black
   popUpBackground.drawRoundedRect(0, 0, 250, 100, 10); // Width, height, and rounded corners
@@ -10,7 +8,8 @@ export function onInteract(event, app, text) {
   popUpBackground.x = (app.screen.width - popUpBackground.width) / 2;
   popUpBackground.y = (app.screen.height - popUpBackground.height) / 2;
 
-  const popUpText = new PIXI.Text(text, {
+  const popUpText = new PIXI.Text({
+    text,
     fontFamily: 'Arial', 
     fontSize: 20, 
     fill: 0x000000, 
