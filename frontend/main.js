@@ -21,10 +21,16 @@ function isWithinBounds(character, bounds) {
   }).then(() => {
     document.body.appendChild(app.canvas); // Use app.view to append the canvas
 
-    Assets.add({ alias: 'amogus', src: '/assets/xak.png' });
-    Assets.add({ alias: 'floor', src: '/assets/wood.png' });
+    Assets.add({ alias: 'amogusfront', src: '/assets/xak.png' });
+    Assets.add({ alias: 'amogusback', src: '/assets/gojodrink.png'}); //change to actual back
+    Assets.add({ alias: 'amogusleft', src: '/assets/Red_Amogus.png'}); //change to actual left
+    Assets.add({ alias: 'amogusright', src: '/assets/back_hover.png'}); //change to actual right
+    Assets.add({ alias: 'floor', src: '/assets/wood.png' }); //floor
+
 
     let mapBounds;
+    const characterTextures = {};
+
     // Load the floor first
     Assets.load('floor').then(() => {
       // Create a container for the map
@@ -32,10 +38,10 @@ function isWithinBounds(character, bounds) {
       app.stage.addChild(mapContainer);
 
       // Define the size and layout of the flooring
-      const tileWidth = 64; // Width of each tile
-      const tileHeight = 64; // Height of each tile
-      const mapRows = 10; // Number of rows
-      const mapCols = 10; // Number of columns
+      const tileWidth = 64;
+      const tileHeight = 64;
+      const mapRows = 10;
+      const mapCols = 10;
 
       const centerX = (app.screen.width - (mapCols * tileWidth)) / 2;
       const centerY = (app.screen.height - (mapRows * tileHeight)) / 2;
@@ -47,8 +53,8 @@ function isWithinBounds(character, bounds) {
         for (let col = 0; col < mapCols; col++) {
           const tileSprite = new Sprite(Assets.get('floor'));
           tileSprite.anchor.set(0.5);
-          tileSprite.x = col * tileWidth + tileWidth / 2; // Center the tile
-          tileSprite.y = row * tileHeight + tileHeight / 2; // Center the tile
+          tileSprite.x = col * tileWidth + tileWidth / 2;
+          tileSprite.y = row * tileHeight + tileHeight / 2;
 
           mapContainer.addChild(tileSprite);
         }
@@ -61,10 +67,15 @@ function isWithinBounds(character, bounds) {
       );
 
       // Now load the character sprite
-      return Assets.load('amogus');
-    }).then((texture) => {
+      return Promise.all([
+              Assets.load('amogusfront').then(texture => characterTextures.front = texture),
+              Assets.load('amogusback').then(texture => characterTextures.back = texture),
+              Assets.load('amogusleft').then(texture => characterTextures.left = texture),
+              Assets.load('amogusright').then(texture => characterTextures.right = texture),
+      ]);
+    }).then(() => {
       // Create a new Sprite from the resolved loaded texture
-      const character = new Sprite(texture);
+      const character = new Sprite(characterTextures.front);
 
       character.anchor.set(0.5);
       character.x = app.screen.width / 2;
@@ -74,7 +85,7 @@ function isWithinBounds(character, bounds) {
       character.cursor = 'pointer';
 
       app.stage.addChild(character);
-      const speed = 20;
+      const speed = 24;
 
       // Movement logic
       window.addEventListener('keydown', (event) => {
@@ -83,29 +94,29 @@ function isWithinBounds(character, bounds) {
 
         switch (event.key) {
           case 'ArrowUp':
-            character.y -= speed; // Move up
+            character.texture = characterTextures.back;
+            character.y -= speed;
             break;
           case 'ArrowDown':
-            character.y += speed; // Move down
+            character.texture = characterTextures.front;
+            character.y += speed;
             break;
           case 'ArrowLeft':
-            character.x -= speed; // Move left
+            character.texture = characterTextures.left;
+            character.x -= speed;
             break;
           case 'ArrowRight':
-            character.x += speed; // Move right
+            character.texture = characterTextures.right;
+            character.x += speed;
             break;
         }
-
-        const tempChar = new Sprite(texture);
-        tempChar.x = character.x;
-        tempChar.y = character.y;
-        tempChar.width = character.width;
-        tempChar.height = character.height;
 
         if (!isWithinBounds(character, mapBounds)) {
             character.x = oriX;
             character.y = oriY;
         }
+
+        character.scale.set(3.0);
       });
     });
   });
