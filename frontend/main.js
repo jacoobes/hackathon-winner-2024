@@ -1,10 +1,12 @@
 import './style.css';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
 import { Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
 import { createRectangle, toggle , KoreaMap} from './map.js'
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js'
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js'
+import { loadSounds, playSound } from './soundfx.js'
 
 
 //generic collision detection between two sprites
@@ -34,7 +36,7 @@ function isWithinBounds(character, bounds) {
 
 
 // Main character
-class MainSprite extends Sprite { 
+class MainSprite extends Sprite {
     constructor(texture, options) {
         super(Assets.get(texture))
         this.characterTextures = {
@@ -95,7 +97,9 @@ const initApp = async () => {
       { alias: 'mainBackground', src: '/assets/seoultower.png'},
       { alias: 'background1', src: '/assets/skysunset.png'}
   ])
-  
+
+  loadSounds();
+
   const layers = {
     background: new Container(),
     flooring: new Container(),
@@ -175,7 +179,6 @@ const initApp = async () => {
   table.y =  app.view.height - mapBounds.height 
   table.anchor.set(0.5)
   layers.ui.addChild(table)
-  
 
   const mapLayer = createRectangle(app, { x: centerX,
                                           y: centerY,
@@ -212,15 +215,19 @@ const initApp = async () => {
     switch (event.key) {
         case 'ArrowUp':
             character.moveUp(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowDown':
             character.moveDown(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowLeft':
             character.moveLeft(speed);
+            playSound('woodsteps');
             break;
         case 'ArrowRight':
             character.moveRight(speed);
+            playSound('woodsteps');
             break;
         case ' ': //space key
             for (const ui_el of layers.ui.children) {
