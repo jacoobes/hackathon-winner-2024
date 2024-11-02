@@ -6,7 +6,7 @@
     "watch": "tsc --watch",
     "backend": "node --watch build/index.js",
     "dev:backend": "concurrently \"npm run watch\" \"npm run backend\"",
-    "dev:frontend": "npm start --prefix ./frontend",
+    "dev:frontend": "npm run --prefix ./frontend dev",
     "check-types": "tsc",
     "prettier": "prettier --write .",
     "build:backend": "tsc",
