@@ -5,6 +5,7 @@ import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js';
+import { loadSounds, playSound } from './soundfx.js'
 
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
@@ -154,7 +155,7 @@ const initApp = async () => {
     { alias: 'background1', src: '/assets/skysunset.png' },
     { alias: 'sprite', src: '/assets/spritesheet.png'}
   ]);
-
+  loadSounds()
   const w = 34;
   const h = 34;
 
@@ -286,7 +287,16 @@ const initApp = async () => {
   });
   mapLayer.visible = false;
   mapLayer.anchor.set(0.5);
-  const koreaMap = new KoreaMap(app, mapLayer);
+  const koreaMap = new KoreaMap(app, mapLayer, ({ event, name }) => {
+
+        onRoomUpdate(layers, name);
+//        switch(name) {
+//            case 'Seoul': {
+//            }break;
+//            case 'Busan': { } break;
+//            case 'Jeju Island': { } break;
+//        }
+  });
 
   mapLayer.eventMode = 'static';
   layers.ui.addChild(mapLayer);
@@ -341,6 +351,7 @@ function hideMapLayerOnMove() {
 
     if (keys['ArrowUp'] || keys['KeyW']) {
       character.moveUp(speed);
+      playSound('woodsteps')
       moving = true;
     }
     if (keys['ArrowDown'] || keys['KeyS']) {
@@ -355,6 +366,8 @@ function hideMapLayerOnMove() {
       character.moveRight(speed);
       moving = true;
     }
+    // only play sound if moving
+    moving && playSound('woodsteps')
 
     if (!moving) {
       character.standStill();

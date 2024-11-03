@@ -117,7 +117,7 @@ async setup() {
         // Update loading text
         this.loadingText.text = `${this.options.loadingText} ${Math.round(progress * 100)}%`;
     }
-
+    
     /**
      * Start loading assets and track progress
      * @param {Array} assets - Array of asset objects to load
