@@ -80,7 +80,7 @@ export function onRoomUpdate(layers, option) {
             sprite.y = interactive.y;
             sprite.scale.set(interactive.scale);
             //sprite.interactionMessage = roomConfig.interactive.interaction;
-            layers.ui.addChild(interactive);
+            layers.ui.addChild(sprite);
         }
 
 
