@@ -360,7 +360,13 @@ const initApp = async () => {
   table.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height)
   table.anchor.set(0.5);
   table.scale.set(2);
+  table.uid = 'table'; // Assign a unique UID
   layers.ui.addChild(table);
+
+  const anotherElement = Sprite.from('someAsset');
+  anotherElement.uid = 'anotherElement';
+  layers.ui.addChild(anotherElement);
+
 
   const koreaMap = new KoreaMap(app, centerX, centerY, ({ event, name }) => {
         onRoomUpdate(layers, name);
@@ -387,8 +393,9 @@ const initApp = async () => {
     if (event.code === 'Space' && !window.isPopupActive) {
       for (const ui_el of layers.ui.children) {
         if (testForAABB(character.sprite, ui_el)) {
-          if (ui_el.uid == table.uid) {
+          if (ui_el.uid === 'table') {
             koreaMap.toggleVisibility();
+            playSound('mapinteract'); // Play the map interaction sound
             break;
           }
 
@@ -432,10 +439,11 @@ const initApp = async () => {
     }
 
     // Play movement sound if moving and sound is not already playing
-    if (moving && !isMovingSoundPlaying) {
-      playSound('woodsteps', 1.5, true);
-      isMovingSoundPlaying = true;
-    }
+if (moving && !isMovingSoundPlaying) {
+  playSound('woodsteps', 1.5, true); // Specify loop as true
+  isMovingSoundPlaying = true;
+}
+
 
     // Stop movement sound if not moving
     if (!moving && isMovingSoundPlaying) {
