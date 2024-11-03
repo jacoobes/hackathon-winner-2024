@@ -3,11 +3,15 @@ import { createRectangle, toggle , KoreaMap } from './map.js';
 import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet, TextureStyle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
-import { onRoomUpdate } from './roomUpdates.js';
+import { createTable } from './roomUpdates.js';
 import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
 
 TextureStyle.defaultOptions.scaleMode = 'nearest';
+  const tileWidth = 64;
+  const tileHeight = 64;
+  const mapRows = 10;
+  const mapCols = 10;
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -231,36 +235,37 @@ const initApp = async () => {
   Object.values(layers).forEach((layer) => {
     app.stage.addChild(layer);
   });
+  app.centerX = app.screen.width / 2; 
+  app.centerY = app.screen.height / 2; 
 
+
+  const mapBounds = new Rectangle(
+    app.centerX - (mapCols * tileWidth) / 2,
+    app.centerY - (mapRows * tileHeight) / 2,
+    mapCols * tileWidth,
+    mapRows * tileHeight
+  );
   createMenu(layers);
-  onRoomUpdate(layers, 'mainBackground');
-
-  return { layers, app, spritesheet };
+  
+  return { layers, app, spritesheet, mapBounds };
 };
 
 // create new PixiJS application
 (async () => {
-  const { layers, app, spritesheet } = await initApp();
+  const { layers, app, spritesheet, mapBounds } = await initApp();
 
   // initialize floor
   const floorSprite = Sprite.from('floor');
   layers.flooring.addChild(floorSprite);
 
-  let mapBounds;
-
   // define the size and layout of the flooring
-  const tileWidth = 64;
-  const tileHeight = 64;
-  const mapRows = 10;
-  const mapCols = 10;
 
-  const centerX = app.screen.width / 2; 
-  const centerY = app.screen.height / 2; 
 
-  layers.background.x = centerX;
-  layers.background.y = centerY;
-  layers.flooring.x = centerX;
-  layers.flooring.y = centerY;
+
+  layers.background.x = app.centerX;
+  layers.background.y = app.centerY;
+  layers.flooring.x = app.centerX;
+  layers.flooring.y = app.centerY;
 
   function createWall(x, y, orientation) {
       const wall = new Container();
@@ -397,34 +402,18 @@ const initApp = async () => {
   initializeRoom(mapCols, mapRows, layers);
 
 
-  mapBounds = new Rectangle(
-    centerX - (mapCols * tileWidth) / 2,
-    centerY - (mapRows * tileHeight) / 2,
-    mapCols * tileWidth,
-    mapRows * tileHeight
-  );
-
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
 
-  const table = Sprite.from('table');
-  table.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height)
-  table.anchor.set(0.5);
-  table.scale.set(2);
-  table.uid = 'table'; // Assign a unique UID
+  const koreaMap = new KoreaMap(app, layers, mapBounds);
+  koreaMap.onRoomUpdate('Seoul');
+  const table = createTable(app, mapBounds);
+
   layers.ui.addChild(table);
-
-  const anotherElement = Sprite.from('someAsset');
-  anotherElement.uid = 'anotherElement';
-  layers.ui.addChild(anotherElement);
-
-
-  const koreaMap = new KoreaMap(app, centerX, centerY, ({ event, name }) => {
-        onRoomUpdate(layers, name);
-  });
-
-  layers.ui.addChild(koreaMap.rectangleSprite);
-
+  layers.ui.addChild(koreaMap.rectangleSprite)
+  
+  koreaMap.city = "Seoul"
+  
   // movement speed
   const speed = 3.5;
 
@@ -438,22 +427,18 @@ const initApp = async () => {
         if(koreaMap.rectangleSprite.visible) {
             koreaMap.rectangleSprite.visible = false
         }
-      }
+    }
 
     // handle interaction on space bar press
-    if (event.code === 'Space' && !window.isPopupActive) {
+    if (event.code === 'Space' ) {
       for (const ui_el of layers.ui.children) {
         if (testForAABB(character.sprite, ui_el)) {
           if (ui_el.uid === 'table') {
-            koreaMap.toggleVisibility();
+            toggle(koreaMap.rectangleSprite);
             playSound('mapinteract'); // Play the map interaction sound
             break;
           }
 
-//          if (ui_el.uid != mapLayer.uid) {
-//            onInteract(app, ui_el, 'hello');
-//            break;
-//          }
         }
       }
     }
@@ -490,10 +475,10 @@ const initApp = async () => {
     }
 
     // Play movement sound if moving and sound is not already playing
-if (moving && !isMovingSoundPlaying) {
-  playSound('woodsteps', 1.5, true); // Specify loop as true
-  isMovingSoundPlaying = true;
-}
+    if (moving && !isMovingSoundPlaying) {
+      playSound('woodsteps', 1.5, true); // Specify loop as true
+      isMovingSoundPlaying = true;
+    }
 
 
     // Stop movement sound if not moving
@@ -518,5 +503,5 @@ if (moving && !isMovingSoundPlaying) {
     }
   });
 
-  const menu = createMenu(layers);
+  const menu = createMenu(layers, koreaMap);
 })();

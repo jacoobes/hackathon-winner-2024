@@ -1,7 +1,7 @@
-import { onRoomUpdate } from './roomUpdates.js';
+import { ROOM_CONFIGS } from './roomUpdates.js';
 import { Graphics, Text, Container } from 'pixi.js';
 
-export function createMenu(layers) {
+export function createMenu(layers, koreaMap) {
     const menuWidth = 200;
     const menuHeight = window.innerHeight;
     let isOpen = false;
@@ -26,7 +26,7 @@ export function createMenu(layers) {
     title.position.set(10, 50);
     menuBackground.addChild(title);
 
-    const options = ['mainBackground', 'option1'];
+    const options = Object.keys(ROOM_CONFIGS);
 
     // Create buttons with press effect
     options.forEach((option, index) => {
@@ -61,7 +61,8 @@ export function createMenu(layers) {
                 while (layers.background.children.length > 0) {
                     layers.background.removeChild(layers.background.children[0]);
                 }
-                onRoomUpdate(layers, option);
+                // Call room update
+                koreaMap.onRoomUpdate(option);
             }
         });
 
