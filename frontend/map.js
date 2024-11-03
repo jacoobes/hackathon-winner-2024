@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { ROOM_CONFIGS } from './roomUpdates.js'
+import { ROOM_CONFIGS, updateRoom, cleanup } from './roomUpdates.js'
 
 const DEFAULT_RECT_OPTIONS = {
     x: 0, y: 0, width: 150, height: 100, borderRadius: 0
@@ -83,7 +83,8 @@ export class KoreaMap {
         });
     }
     onRoomUpdate(option) {
-        const layers = this.layers
+        const layers = this.layers;
+        cleanup(layers.ui);
         if (layers.background.children.length > 0) {
             layers.background.removeChildren();
         }
@@ -93,7 +94,7 @@ export class KoreaMap {
                     continue
                 }
                 layers.ui.removeChild(child);
-                child.destroy({ children: true });
+                child.destroy({ children: true, texture: true, baseTexture: true});
 
             }
             const map = layers.ui.children.find(child => child.uid === 'KOREAMAP')
@@ -104,13 +105,17 @@ export class KoreaMap {
                 map.visible = false;
             }
         }
-        
-        
+
+
         const roomConfig = ROOM_CONFIGS[option];
-        if (!roomConfig) { 
+        if (!roomConfig) {
             console.warn("Unknown roomConfig", roomConfig)
             return;
         }
+
+        updateRoom(option, layers);
+
+        this.app.renderer.render(this.app.stage);
 
         let background;
 
@@ -167,7 +172,7 @@ export class KoreaMap {
     //                layers.ui.addChild(koreaMap.rectangleSprite);
                     //sprite.interactionMessage = roomConfig.interactive.interaction;
                 }
-                
+
             }
 
 
