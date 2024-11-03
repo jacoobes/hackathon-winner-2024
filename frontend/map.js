@@ -97,8 +97,9 @@ export class KoreaMap {
 
             }
             const map = layers.ui.children.find(child => child.uid === 'KOREAMAP')
+            // to put map in foreground
+            map.zIndex = 1
             layers.ui.setChildIndex(map, layers.ui.children.length - 1);
-            layers.ui.addChild(map)
             if(map.visible) {
                 map.visible = false;
             }
