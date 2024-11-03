@@ -156,8 +156,9 @@ const initApp = async () => {
     { alias: 'background1', src: '/assets/skysunset.png' },
     { alias: 'sprite', src: '/assets/spritesheet.png'},
     { alias: 'table', src: '/assets/table.png'},
-    { alias: 'pin', src: '/assets/pin.png'}
-
+    { alias: 'pin', src: '/assets/pin.png'},
+    { alias: 'wall', src: '/assets/wallv1.png'},
+    { alias: 'wallside', src: '/assets/wallside.png'}
   ]);
   loadSounds()
   const w = 34;
@@ -253,16 +254,97 @@ const initApp = async () => {
   layers.flooring.x = centerX;
   layers.flooring.y = centerY;
 
-  for (let row = 0; row < mapRows; row++) {
-    for (let col = 0; col < mapCols; col++) {
-      const tileSprite = Sprite.from('floor');
-      tileSprite.anchor.set(0.5);
-      tileSprite.x = col * tileWidth - (mapCols * tileWidth) / 2 + tileWidth / 2; // Adjust position based on center
-      tileSprite.y = row * tileHeight - (mapRows * tileHeight) / 2 + tileHeight / 2; // Adjust position based on center
+  function createWall(x, y, isNorthWall = false) {
+      const wall = new Container();
 
-      layers.flooring.addChild(tileSprite);
-    }
+      if (isNorthWall) {
+          // Taller north wall
+          const wallFront = Sprite.from('wall');
+          wallFront.width = 64;
+          wallFront.height = 96; // Much taller for north wall
+          wallFront.anchor.set(0.5);
+          wall.addChild(wallFront);
+      } else {
+          // Side and bottom walls
+          const wallFront = Sprite.from('wallside');
+          wallFront.width = 32; // Slimmer for side walls
+          wallFront.height = 64;
+          wallFront.anchor.set(1);
+          wall.addChild(wallFront);
+      }
+
+      // Adjust wall position to align with tiles
+      wall.position.set(x + tileWidth/2, y);
+      return wall;
   }
+
+  const createWalls = (mapCols, mapRows, layers) => {
+      const walls = [];
+      const mapWidth = mapCols * tileWidth;
+      const mapHeight = mapRows * tileHeight;
+
+      // First create floor tiles (including corners)
+      for (let row = 0; row <= mapRows - 1; row++) {
+          for (let col = 0; col <= mapCols - 1; col++) {
+              const tileSprite = Sprite.from('floor');
+              tileSprite.anchor.set(0.5);
+              tileSprite.x = col * tileWidth - (mapCols * tileWidth) / 2 + tileWidth / 2;
+              tileSprite.y = row * tileHeight - (mapRows * tileHeight) / 2 + tileHeight / 2;
+              layers.flooring.addChild(tileSprite);
+          }
+      }
+
+      // Create north walls (taller)
+      for (let col = 0; col < mapCols; col++) {
+          walls.push(createWall(
+              col * tileWidth - (mapWidth / 2),
+              -mapHeight / 2,
+              true
+          ));
+      }
+
+      // Create south walls
+      for (let col = 0; col < mapCols; col++) {
+          walls.push(createWall(
+              col * tileWidth - (mapWidth / 2),
+              mapHeight / 2
+          ));
+      }
+
+      // Create west walls
+      for (let row = 0; row < mapRows; row++) {
+          walls.push(createWall(
+              -mapWidth / 2,
+              row * tileHeight - (mapHeight / 2)
+          ));
+      }
+
+      // Create east walls
+      for (let row = 0; row < mapRows; row++) {
+          walls.push(createWall(
+              mapWidth / 2,
+              row * tileHeight - (mapHeight / 2)
+          ));
+      }
+
+      // Add corner pieces to ensure complete coverage
+      const corners = [
+          createWall(-mapWidth / 2, -mapHeight / 2), // Top-left
+          createWall(mapWidth / 2, -mapHeight / 2),  // Top-right
+          createWall(-mapWidth / 2, mapHeight / 2),  // Bottom-left
+          createWall(mapWidth / 2, mapHeight / 2)    // Bottom-right
+      ];
+
+      walls.push(...corners);
+
+      walls.forEach(wall => layers.flooring.addChild(wall));
+  };
+
+  const initializeRoom = (mapCols, mapRows, layers) => {
+      createWalls(mapCols, mapRows, layers);
+  };
+
+  initializeRoom(mapCols, mapRows, layers);
 
   mapBounds = new Rectangle(
     centerX - (mapCols * tileWidth) / 2,
