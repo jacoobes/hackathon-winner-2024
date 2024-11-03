@@ -1,8 +1,22 @@
 @font-face {
   font-family: 'Monocraft';
-  src: url('../frontend/assets/Font/Monocraft.ttc') format('truetype');
+  src: url('../frontend/assets/Font/Monocraft.ttc') format('ttc');
   font-weight: normal;
   font-style: normal;
+}
+
+body {
+  font-family: 'Space Mono', monospace; /* Fallback to monospace if the font doesn't load */
+}
+
+h1 {
+  font-family: 'Space Mono', monospace; /* Use the font for headings */
+  font-weight: 700; /* Use bold weight */
+}
+
+p {
+  font-family: 'Space Mono', monospace; /* Use the font for paragraphs */
+  font-weight: 400; /* Use normal weight */
 }
 
 :root {
