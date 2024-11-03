@@ -26,8 +26,8 @@ export function onInteract(app, ui_el, text) {
   popUpBackground.y = (app.screen.height - popUpBackground.height * 1.55);
 
   const popUpStyle = {
-    fontFamily: 'Monocraft',
-    fontSize: 18,
+    fontFamily: 'Space Mono',
+    fontSize: 19,
     fill: 0x000000,
     align: 'left'
   }
