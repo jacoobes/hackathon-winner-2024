@@ -15,22 +15,21 @@ export const toggle = (x) => {
 
 
 export class KoreaMap {
-    constructor(app, centerX, centerY, onCityClick) {
+    constructor(app, onCityClick) {
         this.app = app;
         const mapLayer = createRectangle(app, {
-            x: centerX,
-            y: centerY,
+            x: app.centerX,
+            y: app.centerY,
             borderRadius: 50,
             outline: { thickness: 6, color: 0x000080 },
             width: 500,
             height: 500,
           });
-        mapLayer.visible = false;
         mapLayer.anchor.set(0.5);
         mapLayer.eventMode = 'static';
         this.rectangleSprite = mapLayer;
         this.onCityClick = onCityClick
-
+        this.rectangleSprite.visible = false;
         this.init();
         this.createCityPoints()
     }
@@ -124,7 +123,7 @@ export class KoreaMap {
         ];
 
         cityData.forEach(city => {
-            const cityLabel = new PIXI.Text(city.name, { fill: 0xFFFFFF, fontSize: 20 });
+            const cityLabel = new PIXI.Text({ text: city.name, roundPixels: true,  fill: 0xFFFFFF, fontSize: 20 });
             cityLabel.position.set(city.x, city.y);
             this.rectangleSprite.addChild(cityLabel);
         });

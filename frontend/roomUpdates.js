@@ -1,35 +1,9 @@
-import { Sprite, Assets } from 'pixi.js';
+import { Sprite, Assets, Texture } from 'pixi.js';
 import { onInteract } from './interactable.js';
 
-const ROOM_CONFIGS = {
-    "mainBackground": {
-        background: 'mainBackground',
-        interactives: [{
-            sprite: 'meat',
-            x: 300,
-            y: 190,
-            scale: 3,
-            interaction: "hello"
-        }]
-    },
-    "option1": {
-        background: 'background1',
-        interactives: [{
-            sprite: 'amogusfront',
-            x: 180,
-            y: 190,
-            scale: 2,
-            interaction: "different message"
-        }]
-    },
+export const ROOM_CONFIGS = {
     "Seoul": {
-        interactives: [{
-            sprite: 'amogusfront',
-            x: 500,
-            y: 500,
-            scale: 2,
-            interaction: "different message"
-        }]
+        interactives: []
     },
     "Busan": {
         interactive: [{
@@ -51,7 +25,7 @@ const ROOM_CONFIGS = {
     }
 };
 
-export function onRoomUpdate(layers, option) {
+export function onRoomUpdate(layers, option, app) {
     if (layers.background.children.length > 0) {
         layers.background.removeChildren();
     }
@@ -66,8 +40,19 @@ export function onRoomUpdate(layers, option) {
         return;
     }
 
-    const backgroundTexture = Sprite.from(roomConfig.background);
-    const background = new Sprite(backgroundTexture);
+    let background;
+
+    if (roomConfig.background) {
+        // Use the background texture from roomConfig
+        const backgroundTexture = Texture.from(roomConfig.background);
+        background = new Sprite(backgroundTexture);
+    } else {
+        // Create a black background if roomConfig.background is undefined
+        background = new Sprite(Texture.WHITE);
+        background.tint = 0x000000; // Set color to black
+    }
+
+    // Set background size and position
     background.width = window.innerWidth;
     background.height = window.innerHeight;
     background.anchor.set(0.5);

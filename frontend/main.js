@@ -8,6 +8,10 @@ import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
 
 TextureStyle.defaultOptions.scaleMode = 'nearest';
+  const tileWidth = 64;
+  const tileHeight = 64;
+  const mapRows = 10;
+  const mapCols = 10;
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -223,36 +227,38 @@ const initApp = async () => {
   Object.values(layers).forEach((layer) => {
     app.stage.addChild(layer);
   });
+  app.centerX = app.screen.width / 2; 
+  app.centerY = app.screen.height / 2; 
 
+
+  const mapBounds = new Rectangle(
+    app.centerX - (mapCols * tileWidth) / 2,
+    app.centerY - (mapRows * tileHeight) / 2,
+    mapCols * tileWidth,
+    mapRows * tileHeight
+  );
   createMenu(layers);
-  onRoomUpdate(layers, 'mainBackground');
-
-  return { layers, app, spritesheet };
+  onRoomUpdate(layers, 'Seoul');
+  
+  return { layers, app, spritesheet, mapBounds };
 };
 
 // create new PixiJS application
 (async () => {
-  const { layers, app, spritesheet } = await initApp();
+  const { layers, app, spritesheet, mapBounds } = await initApp();
 
   // initialize floor
   const floorSprite = Sprite.from('floor');
   layers.flooring.addChild(floorSprite);
 
-  let mapBounds;
-
   // define the size and layout of the flooring
-  const tileWidth = 64;
-  const tileHeight = 64;
-  const mapRows = 10;
-  const mapCols = 10;
 
-  const centerX = app.screen.width / 2; 
-  const centerY = app.screen.height / 2; 
 
-  layers.background.x = centerX;
-  layers.background.y = centerY;
-  layers.flooring.x = centerX;
-  layers.flooring.y = centerY;
+
+  layers.background.x = app.centerX;
+  layers.background.y = app.centerY;
+  layers.flooring.x = app.centerX;
+  layers.flooring.y = app.centerY;
 
   function createWall(x, y, isNorthWall = false) {
       const wall = new Container();
@@ -346,12 +352,7 @@ const initApp = async () => {
 
   initializeRoom(mapCols, mapRows, layers);
 
-  mapBounds = new Rectangle(
-    centerX - (mapCols * tileWidth) / 2,
-    centerY - (mapRows * tileHeight) / 2,
-    mapCols * tileWidth,
-    mapRows * tileHeight
-  );
+  
 
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
@@ -363,12 +364,8 @@ const initApp = async () => {
   table.uid = 'table'; // Assign a unique UID
   layers.ui.addChild(table);
 
-  const anotherElement = Sprite.from('someAsset');
-  anotherElement.uid = 'anotherElement';
-  layers.ui.addChild(anotherElement);
 
-
-  const koreaMap = new KoreaMap(app, centerX, centerY, ({ event, name }) => {
+  const koreaMap = new KoreaMap(app, ({ event, name }) => {
         onRoomUpdate(layers, name);
   });
 
@@ -387,7 +384,7 @@ const initApp = async () => {
         if(koreaMap.rectangleSprite.visible) {
             koreaMap.rectangleSprite.visible = false
         }
-      }
+    }
 
     // handle interaction on space bar press
     if (event.code === 'Space' && !window.isPopupActive) {
@@ -439,10 +436,10 @@ const initApp = async () => {
     }
 
     // Play movement sound if moving and sound is not already playing
-if (moving && !isMovingSoundPlaying) {
-  playSound('woodsteps', 1.5, true); // Specify loop as true
-  isMovingSoundPlaying = true;
-}
+    if (moving && !isMovingSoundPlaying) {
+      playSound('woodsteps', 1.5, true); // Specify loop as true
+      isMovingSoundPlaying = true;
+    }
 
 
     // Stop movement sound if not moving

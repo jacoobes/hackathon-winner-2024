@@ -1,4 +1,4 @@
-import { onRoomUpdate } from './roomUpdates.js';
+import { onRoomUpdate, ROOM_CONFIGS } from './roomUpdates.js';
 import { Graphics, Text, Container } from 'pixi.js';
 
 export function createMenu(layers) {
@@ -27,7 +27,7 @@ export function createMenu(layers) {
     title.position.set(10, 50);
     menuBackground.addChild(title);
 
-    const options = ['mainBackground', 'option1'];
+    const options = Object.keys(ROOM_CONFIGS);
 
     // Make buttons interactive
     options.forEach((option, index) => {
