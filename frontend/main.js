@@ -3,15 +3,15 @@ import { createRectangle, toggle , KoreaMap } from './map.js';
 import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet, TextureStyle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
-import { createTable } from './roomUpdates.js';
+import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
+import { GirlfriendMessage } from './gf.js';  // Import the gf.js module
+
+
+let bgmPlaying = true;
 
 TextureStyle.defaultOptions.scaleMode = 'nearest';
-  const tileWidth = 64;
-  const tileHeight = 64;
-  const mapRows = 10;
-  const mapCols = 10;
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -154,25 +154,24 @@ const initApp = async () => {
 
   await splash.loadAssets([
     { alias: 'korea', src: '/assets/korea.png' },
-    { alias: 'floor', src: '/assets/floorv6.png' },
+    { alias: 'girlfriend', src: '/assets/girlfriend.png'},
+    { alias: 'floor', src: '/assets/floorv5.png' },
     { alias: 'meat', src: '/assets/meat.png' },
-    { alias: 'mainBackground', src: '/assets/seoultower.png' },
+    { alias: 'mainBackground', src: '/assets/black.png' },
     { alias: 'background1', src: '/assets/skysunset.png' },
     { alias: 'sprite', src: '/assets/spritesheet.png'},
     { alias: 'table', src: '/assets/table.png'},
+    { alias: 'bed', src: '/assets/bed.png'},
+    { alias: 'nightstand', src: '/assets/nightstand.png'},
+    { alias: 'painting', src: '/assets/painting.png'},
     { alias: 'pin', src: '/assets/pin.png'},
-    { alias: 'bordernorth', src: '/assets/bordernorth.png'},
-    { alias: 'bordersouth', src: '/assets/bordersouth.png'},
-    { alias: 'borderwest', src: '/assets/borderwest.png'},
-    { alias: 'bordereast', src: '/assets/bordereast.png'},
-    { alias: 'cornerNW', src: '/assets/cornerNW.png'},
-    { alias: 'cornerNE', src: '/assets/cornerNE.png'},
-    { alias: 'cornerSW', src: '/assets/cornerSW.png'},
-    { alias: 'cornerSE', src: '/assets/cornerSE.png'},
-    { alias: 'wallnorth', src: '/assets/wallv1.png'},
+    { alias: 'wall', src: '/assets/wallv1.png'},
     { alias: 'wallside', src: '/assets/wallside.png'}
   ]);
   loadSounds()
+
+  playSound('bgm', 1, true, 0.1);
+  
   const w = 34;
   const h = 34;
 
@@ -219,6 +218,36 @@ const initApp = async () => {
     },
   };
 
+  const muteButton = document.createElement('button');
+  muteButton.textContent = 'Mute';
+  muteButton.style.position = 'absolute';
+  muteButton.style.top = '10px';
+  muteButton.style.right = '10px';
+  muteButton.disabled = true; // Initially disable the button
+  
+  document.body.appendChild(muteButton);
+  
+  // Enable the button on mouseover, disable it on mouseout
+  muteButton.addEventListener('mouseover', () => {
+      muteButton.disabled = false;
+  });
+  muteButton.addEventListener('mouseout', () => {
+      muteButton.disabled = true;
+  });
+  
+  muteButton.addEventListener('click', () => {
+      if (bgmPlaying) {
+          stopSound('bgm');
+          muteButton.textContent = 'Unmute';
+      } else {
+          playSound('bgm', 1, true, 0.1);
+          muteButton.textContent = 'Mute';
+      }
+      bgmPlaying = !bgmPlaying;
+  });
+  
+  
+
   // create Spritesheet instance
   const ssheetTexture = Texture.from(atlasData.meta.image);
   const spritesheet = new Spritesheet(ssheetTexture, atlasData);
@@ -227,118 +256,77 @@ const initApp = async () => {
   const layers = {
     background: new Container(),
     flooring: new Container(),
-    menu: new Container(),
+    furniture: new Container(),
     characters: new Container(),
     ui: new Container(),
+    menu: new Container(),
   };
   // add layers to stage in order (bottom to top)
   Object.values(layers).forEach((layer) => {
     app.stage.addChild(layer);
   });
-  app.centerX = app.screen.width / 2; 
-  app.centerY = app.screen.height / 2; 
 
-
-  const mapBounds = new Rectangle(
-    app.centerX - (mapCols * tileWidth) / 2,
-    app.centerY - (mapRows * tileHeight) / 2,
-    mapCols * tileWidth,
-    mapRows * tileHeight
-  );
   createMenu(layers);
-  
-  return { layers, app, spritesheet, mapBounds };
+  onRoomUpdate(layers, 'mainBackground');
+
+
+  return { layers, app, spritesheet };
 };
 
 // create new PixiJS application
 (async () => {
-  const { layers, app, spritesheet, mapBounds } = await initApp();
+  const { layers, app, spritesheet } = await initApp();
 
   // initialize floor
   const floorSprite = Sprite.from('floor');
   layers.flooring.addChild(floorSprite);
 
+  let mapBounds;
+
   // define the size and layout of the flooring
+  const tileWidth = 64;
+  const tileHeight = 64;
+  const mapRows = 10;
+  const mapCols = 10;
 
+  const centerX = app.screen.width / 2; 
+  const centerY = app.screen.height / 2; 
 
+  layers.background.x = centerX;
+  layers.background.y = centerY;
+  layers.flooring.x = centerX;
+  layers.flooring.y = centerY;
 
-  layers.background.x = app.centerX;
-  layers.background.y = app.centerY;
-  layers.flooring.x = app.centerX;
-  layers.flooring.y = app.centerY;
-
-  function createWall(x, y, orientation) {
+  function createWall(x, y, isNorthWall = false) {
       const wall = new Container();
-      let wallSprite;
 
-      // Choose asset based on orientation
-      if (orientation === 'north') {
-          wallSprite = Sprite.from('wallnorth'); // Asset for north wall
-          wallSprite.width = 64;
-          wallSprite.height = 128;
-          wallSprite.anchor.set(0);
-      } else if (orientation === 'south') {
-          wallSprite = Sprite.from('bordersouth'); // New asset for south wall
-          wallSprite.width = 64; // Adjust width as needed
-          wallSprite.height = 10; // Height can be adjusted if different
-          wallSprite.anchor.set(0);
-      } else if (orientation === 'west') {
-          wallSprite = Sprite.from('wallside'); // Asset for west wall
-          wallSprite.width = 32; // Slimmer for west wall
-          wallSprite.height = 240;
-          wallSprite.anchor.set(0); // Anchor to the left for west wall
+      if (isNorthWall) {
+          // Taller north wall
+          const wallFront = Sprite.from('wall');
+          wallFront.width = 64;
+          wallFront.height = 200; // Much taller for north wall
+          wallFront.anchor.set(0.5);
+          wall.addChild(wallFront);
       } else {
-          wallSprite = Sprite.from('wallside'); // Asset for east wall
-          wallSprite.width = 32; // Slimmer for east wall
-          wallSprite.height = 240;
-          wallSprite.anchor.set(0); // Anchor to the left for east wall
+          // Side and bottom walls
+          const wallFront = Sprite.from('wallside');
+          wallFront.width = 32; // Slimmer for side walls
+          wallFront.height = 64;
+          wallFront.anchor.set(1);
+          wall.addChild(wallFront);
       }
-
-      wall.addChild(wallSprite);
 
       // Adjust wall position to align with tiles
-      wall.position.set(x, y);
+      wall.position.set(x + tileWidth/2, y);
       return wall;
   }
-
-  /*const createCorner = (x, y, cornerType, cornerWidth, cornerHeight) => {
-      const corner = new Container();
-      let cornerSprite;
-
-      // Choose corner asset based on corner type
-      switch (cornerType) {
-          case 'NW':
-              cornerSprite = Sprite.from('cornerNW'); // Top-left corner
-              break;
-          case 'NE':
-              cornerSprite = Sprite.from('cornerNE'); // Top-right corner
-              break;
-          case 'SW':
-              cornerSprite = Sprite.from('cornerSW'); // Bottom-left corner
-              break;
-          case 'SE':
-              cornerSprite = Sprite.from('cornerSE'); // Bottom-right corner
-              break;
-      }
-
-      // Scale the corner sprite
-      cornerSprite.width = cornerWidth;
-      cornerSprite.height = cornerHeight;
-
-      corner.addChild(cornerSprite);
-      corner.position.set(x, y);
-      return corner;
-  }*/
 
   const createWalls = (mapCols, mapRows, layers) => {
       const walls = [];
       const mapWidth = mapCols * tileWidth;
       const mapHeight = mapRows * tileHeight;
 
-      //const cornerWidth = 13; // Set desired width for corners
-      //const cornerHeight = 20; // Set desired height for corners
-
-      // Create floor tiles
+      // First create floor tiles (including corners)
       for (let row = 0; row <= mapRows - 1; row++) {
           for (let col = 0; col <= mapCols - 1; col++) {
               const tileSprite = Sprite.from('floor');
@@ -349,21 +337,12 @@ const initApp = async () => {
           }
       }
 
-      // Create north walls
+      // Create north walls (taller)
       for (let col = 0; col < mapCols; col++) {
           walls.push(createWall(
               col * tileWidth - (mapWidth / 2),
-              -(app.screen.height / 2), // Adjust the Y position to 64 (half of the wall height)
-              'north'
-          ));
-      }
-
-      // Create south walls
-      for (let col = 0; col < mapCols; col++) {
-          walls.push(createWall(
-              col * tileWidth - (mapWidth / 2),
-              mapHeight / 2,
-              'south'
+              -mapHeight / 2,
+              true
           ));
       }
 
@@ -371,8 +350,7 @@ const initApp = async () => {
       for (let row = 0; row < mapRows; row++) {
           walls.push(createWall(
               -mapWidth / 2,
-              row * tileHeight - (mapHeight / 2) - 90,
-              'west'
+              row * tileHeight - (mapHeight / 2)
           ));
       }
 
@@ -380,18 +358,20 @@ const initApp = async () => {
       for (let row = 0; row < mapRows; row++) {
           walls.push(createWall(
               mapWidth / 2,
-              row * tileHeight - (mapHeight / 2) - 90,
-              'east'
+              row * tileHeight - (mapHeight / 2)
           ));
       }
 
-      // Add corner pieces with specified width and height
-     /* walls.push(createCorner(-mapWidth / 2, -mapHeight / 2, 'NW', cornerWidth, cornerHeight)); // Top-left
-      walls.push(createCorner((mapWidth / 2 - cornerWidth) + 13, -mapHeight / 2, 'NE', cornerWidth, cornerHeight)); // Top-right
-      walls.push(createCorner(-mapWidth / 2, (mapHeight / 2 - cornerHeight) + 13, 'SW', cornerWidth, cornerHeight - 3)); // Bottom-left
-      walls.push(createCorner((mapWidth / 2 - cornerWidth) + 13, mapHeight / 2 - cornerHeight, 'SE', cornerWidth, cornerHeight+10)); // Bottom-right
+      // Add corner pieces to ensure complete coverage
+      const corners = [
+          createWall(-mapWidth / 2, -mapHeight / 2), // Top-left
+          createWall(mapWidth / 2, -mapHeight / 2),  // Top-right
+          createWall(-mapWidth / 2, mapHeight / 2),  // Bottom-left
+          createWall(mapWidth / 2, mapHeight / 2)    // Bottom-right
+      ];
 
-      // Add walls to the layer*/
+      walls.push(...corners);
+
       walls.forEach(wall => layers.flooring.addChild(wall));
   };
 
@@ -401,48 +381,189 @@ const initApp = async () => {
 
   initializeRoom(mapCols, mapRows, layers);
 
+  mapBounds = new Rectangle(
+    centerX - (mapCols * tileWidth) / 2,
+    centerY - (mapRows * tileHeight) / 2,
+    mapCols * tileWidth,
+    mapRows * tileHeight
+  );
 
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
 
-  const koreaMap = new KoreaMap(app, layers, mapBounds);
-  koreaMap.onRoomUpdate('Seoul');
-  const table = createTable(app, mapBounds);
+  const gfMessage = new GirlfriendMessage(app, layers);
 
-  layers.ui.addChild(table);
-  layers.ui.addChild(koreaMap.rectangleSprite)
+
+// Key tracking
+let spacePressed = false;
+
+window.addEventListener('keydown', (event) => {
+  keys[event.code] = true;
+
+  if (event.code === 'Space' && !spacePressed && !window.isPopupActive) {
+    spacePressed = true; // Mark space as pressed
+    const interactableLayers = [layers.ui, layers.furniture];
+
+    for (const layer of interactableLayers) {
+      for (const el of layer.children) {
+        if (testForAABB(character.sprite, el)) {
+          if (el.uid === 'table') {
+            koreaMap.toggleVisibility();
+            playSound('mapinteract');
+            break;
+          } else if (el.uid === 'girlfriend') {
+            gfMessage.showMessage();
+            break;
+          }
+        }
+      }
+    }
+  }
+});
+
+window.addEventListener('keyup', (event) => {
+  keys[event.code] = false;
+  if (event.code === 'Space') {
+    spacePressed = false; // Reset spacePressed when Space is released
+  }
+});
+
+
+  const table = Sprite.from('table');
+  table.position.set(app.canvas.width / 2.7 ,app.canvas.height - mapBounds.height/1.1)
+  table.anchor.set(0.5);
+  table.scale.set(2.5);
+  table.uid = 'table'; // Assign a unique UID
+  layers.furniture.addChild(table);
+
+  // Define collision bounds with adjustable properties
+table.collisionBounds = {
+  x: table.x - 50,  
+  y: table.y - 30,
+  width: 1000,     
+  height: 60        
+};
+
+
+const girlfriend = Sprite.from('girlfriend');
+girlfriend.position.set(table.x + 150, table.y + -1); 
+girlfriend.anchor.set(0.5);
+girlfriend.scale.set(2.5);
+girlfriend.uid = 'girlfriend'; 
+layers.furniture.addChild(girlfriend);
+
+// Collision check function that uses table's custom collision bounds
+function checkCollision(character, table) {
+  const characterBounds = character.getBounds();
+  const tableBounds = {
+      x: table.collisionBounds.x,
+      y: table.collisionBounds.y,
+      width: table.collisionBounds.width,
+      height: table.collisionBounds.height
+  };
+
+  return (
+      characterBounds.x < tableBounds.x + tableBounds.width &&
+      characterBounds.x + characterBounds.width > tableBounds.x &&
+      characterBounds.y < tableBounds.y + tableBounds.height &&
+      characterBounds.y + characterBounds.height > tableBounds.y
+  );
+}
+
+window.addEventListener('keydown', (event) => {
+    keys[event.code] = true;
+
+    if (event.code === 'Space' && !spacePressed && !window.isPopupActive) {
+        spacePressed = true; // Mark space as pressed
+        const interactableLayers = [layers.ui, layers.furniture];
+
+        for (const layer of interactableLayers) {
+            for (const el of layer.children) {
+                if (el.uid === 'table' && testForAABB(character.sprite, el)) {
+
+                    koreaMap.toggleVisibility();
+                    playSound('mapinteract');
+                    break;
+                }
+            }
+        }
+    }
+});
+
+window.addEventListener('keyup', (event) => {
+    keys[event.code] = false;
+    if (event.code === 'Space') {
+        spacePressed = false; // Reset spacePressed when Space is released
+    }
+});
+
+
+  const bedSprite = Sprite.from('bed');
+  bedSprite.position.set(table.x + 380, table.y + 2); 
+  bedSprite.anchor.set(0.4);
+  bedSprite.scale.set(2.5);
+  bedSprite.uid = 'bed'; 
+  layers.furniture.addChild(bedSprite); 
+
+  const nightstand = Sprite.from('nightstand'); 
+  nightstand.position.set(bedSprite.x - 100, bedSprite.y); 
+  nightstand.anchor.set(0.5);
+  nightstand.scale.set(1.5);
+  nightstand.uid = 'nightstand';
+  layers.furniture.addChild(nightstand); 
   
-  koreaMap.city = "Seoul"
+  const painting = Sprite.from('painting'); 
+  painting.position.set(bedSprite.x - 225, bedSprite.y - 115); 
+  painting.anchor.set(0.5);
+  painting.scale.set(1.5);
+  painting.uid = 'painting';
+  layers.furniture.addChild(painting); 
   
+
+  const anotherElement = Sprite.from('someAsset');
+  anotherElement.uid = 'anotherElement';
+  layers.ui.addChild(anotherElement);
+
+
+  const koreaMap = new KoreaMap(app, centerX, centerY, ({ event, name }) => {
+        onRoomUpdate(layers, name);
+  });
+
+  layers.ui.addChild(koreaMap.rectangleSprite);
+
   // movement speed
   const speed = 3.5;
 
   // function to hide the mapLayer
 
-  // key tracking
   window.addEventListener('keydown', (event) => {
-    keys[event.code] = true;
-
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
-        if(koreaMap.rectangleSprite.visible) {
-            koreaMap.rectangleSprite.visible = false
-        }
-    }
-
-    // handle interaction on space bar press
-    if (event.code === 'Space' ) {
-      for (const ui_el of layers.ui.children) {
-        if (testForAABB(character.sprite, ui_el)) {
-          if (ui_el.uid === 'table') {
-            toggle(koreaMap.rectangleSprite);
-            playSound('mapinteract'); // Play the map interaction sound
-            break;
+      keys[event.code] = true;
+  
+      if (event.code === 'Space' && !spacePressed && !window.isPopupActive) {
+          spacePressed = true; // Mark space as pressed
+          const interactableLayers = [layers.ui, layers.furniture];
+  
+          for (const layer of interactableLayers) {
+              for (const el of layer.children) {
+                  if (testForAABB(character.sprite, el)) {
+                      if (el.uid === 'table') {
+                          koreaMap.toggleVisibility();
+                          playSound('mapinteract');
+                          break;
+                      }
+                  }
+              }
           }
-
-        }
       }
-    }
   });
+  
+  window.addEventListener('keyup', (event) => {
+      keys[event.code] = false;
+      if (event.code === 'Space') {
+          spacePressed = false; // Reset spacePressed when Space is released
+      }
+  });
+  
 
 
   window.addEventListener('keyup', (event) => {
@@ -475,10 +596,10 @@ const initApp = async () => {
     }
 
     // Play movement sound if moving and sound is not already playing
-    if (moving && !isMovingSoundPlaying) {
-      playSound('woodsteps', 1.5, true); // Specify loop as true
-      isMovingSoundPlaying = true;
-    }
+if (moving && !isMovingSoundPlaying) {
+  playSound('woodsteps', 1.5, true); // Specify loop as true
+  isMovingSoundPlaying = true;
+}
 
 
     // Stop movement sound if not moving
@@ -486,22 +607,20 @@ const initApp = async () => {
       stopSound('woodsteps'); // Make sure to implement this function in `soundfx.js`
       isMovingSoundPlaying = false;
     }
-    if(testForAABB(table, character.sprite)) {
-        moving = false;
-    }
-    // only play sound if moving
-    //moving && playSound('woodsteps')
 
     if (!moving) {
       character.standStill();
     }
+
 
     // check bounds
     if (!isWithinBounds(character.sprite, mapBounds)) {
       character.x = oriX;
       character.y = oriY;
     }
+
+
   });
 
-  const menu = createMenu(layers, koreaMap);
+  const menu = createMenu(layers);
 })();
