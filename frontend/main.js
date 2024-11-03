@@ -5,7 +5,7 @@ import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js';
-import { loadSounds, playSound } from './soundfx.js'
+import { loadSounds, playSound, stopSound } from './soundfx.js'
 
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
@@ -149,7 +149,7 @@ const initApp = async () => {
 
   await splash.loadAssets([
     { alias: 'korea', src: '/assets/korea.png' },
-    { alias: 'floor', src: '/assets/wood.png' },
+    { alias: 'floor', src: '/assets/floorv5.png' },
     { alias: 'meat', src: '/assets/meat.png' },
     { alias: 'mainBackground', src: '/assets/seoultower.png' },
     { alias: 'background1', src: '/assets/skysunset.png' },
@@ -342,6 +342,7 @@ function hideMapLayerOnMove() {
     keys[event.code] = false;
   });
 
+  let isMovingSoundPlaying = false;
   // game loop for movement and animation
   app.ticker.add((delta) => {
     let moving = false;
@@ -351,7 +352,6 @@ function hideMapLayerOnMove() {
 
     if (keys['ArrowUp'] || keys['KeyW']) {
       character.moveUp(speed);
-      playSound('woodsteps')
       moving = true;
     }
     if (keys['ArrowDown'] || keys['KeyS']) {
@@ -366,8 +366,18 @@ function hideMapLayerOnMove() {
       character.moveRight(speed);
       moving = true;
     }
-    // only play sound if moving
-    moving && playSound('woodsteps')
+
+    // Play movement sound if moving and sound is not already playing
+    if (moving && !isMovingSoundPlaying) {
+      playSound('woodsteps', 1.5, true);
+      isMovingSoundPlaying = true;
+    }
+
+    // Stop movement sound if not moving
+    if (!moving && isMovingSoundPlaying) {
+      stopSound('woodsteps'); // Make sure to implement this function in `soundfx.js`
+      isMovingSoundPlaying = false;
+    }
 
     if (!moving) {
       character.standStill();
