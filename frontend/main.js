@@ -1,6 +1,6 @@
 import './style.css';
 import { createRectangle, toggle , KoreaMap } from './map.js';
-import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, SpriteSheet } from 'pixi.js';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
 import { onRoomUpdate } from './roomUpdates.js';
@@ -38,7 +38,7 @@ class MainSprite extends Container {
   constructor(options) {
     super();
     this.spritesheet = options.spritesheet;
-
+    
     // start with standSouth animation
     this.sprite = new AnimatedSprite(this.spritesheet.animations['standSouth']);
     this.sprite.anchor.set(0.5);
@@ -203,6 +203,7 @@ const initApp = async () => {
 
   // create Spritesheet instance
   const ssheetTexture = Texture.from(atlasData.meta.image);
+  ssheetTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
   const spritesheet = new Spritesheet(ssheetTexture, atlasData);
   await spritesheet.parse();
 
