@@ -14,26 +14,39 @@ export const ROOM_CONFIGS = {
     "Seoul": {
         interactives: [ 
             {
-                sprite: 'meat',
-                x: 275+500,
-                y: 200,
-                scale: 2,
+                sprite: 'koreanflag',
+                x: 270+500,
+                y: 65,
                 type: "info",
             },
             {
-                sprite: 'meat',
-                x: 175+500,
+                sprite: 'fhanbok',
+                x: 1050,
                 y: 300,
-                scale: 2,
                 type: "info",
             },
             {
-                sprite: 'meat',
-                x: 175+500,
+                sprite: 'mhanbok',
+                x: 1050,
                 y: 400,
                 scale: 2,
                 type: "info",
             },
+            {
+                //from right to left, kimchi, korean chicken wings, Samgyeopsal, Tteokbokki
+                sprite: 'tableseoul',
+                x: 150+500,
+                y: 650,
+                scale: 3,
+                type: "info",
+            },
+
+            {
+                sprite: 'myeongdong',
+                x: 500+500,
+                y: 550,
+                type: "info",
+            }
             
         ]
     },
@@ -54,6 +67,15 @@ export const ROOM_CONFIGS = {
                 scale: 2,
                 type: "info",
             },
+            // from left to right "Sashimi (Hoe)", "Grilled Eel (Jangeo-gui)",
+            // "Busan-style Dwaeji Gukbap", "Bindaetteok (Mung Bean Pancakes)"
+            {
+                sprite: 'tablebusan',
+                x: 150+500,
+                y: 650,
+                scale: 3,
+                type: "info",
+            }
         ]
     },
     "Jeju Island": {

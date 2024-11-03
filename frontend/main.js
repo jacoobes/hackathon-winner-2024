@@ -170,7 +170,13 @@ const initApp = async () => {
     { alias: 'cornerSW', src: '/assets/cornerSW.png'},
     { alias: 'cornerSE', src: '/assets/cornerSE.png'},
     { alias: 'wallnorth', src: '/assets/wallv1.png'},
-    { alias: 'wallside', src: '/assets/wallside.png'}
+    { alias: 'wallside', src: '/assets/wallside.png'},
+    { alias: 'tableseoul', src: '/assets/table-seoul.png' },
+    { alias: 'tablebusan', src: '/assets/table-busan.png' },
+    { alias: 'koreanflag', src: '/assets/koreanflag.png' },
+    { alias: 'fhanbok', src: '/assets/fhanbok.png' },
+    { alias: 'mhanbok', src: '/assets/mhanbok.png' },
+    { alias: 'myeongdong', src: '/assets/myeongdong.png' }
   ]);
   loadSounds()
   const w = 34;
