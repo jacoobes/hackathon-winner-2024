@@ -1,4 +1,6 @@
 import * as PIXI from 'pixi.js'
+import { ROOM_CONFIGS } from './roomUpdates.js'
+
 const DEFAULT_RECT_OPTIONS = {
     x: 0, y: 0, width: 150, height: 100, borderRadius: 0
 }
@@ -15,7 +17,7 @@ export const toggle = (x) => {
 
 
 export class KoreaMap {
-    constructor(app, onCityClick) {
+    constructor(app, layers, mapBounds) {
         this.app = app;
         const mapLayer = createRectangle(app, {
             x: app.centerX,
@@ -28,14 +30,19 @@ export class KoreaMap {
         mapLayer.anchor.set(0.5);
         mapLayer.eventMode = 'static';
         this.rectangleSprite = mapLayer;
-        this.onCityClick = onCityClick
+        this.rectangleSprite.uid = 'KOREAMAP'
+        this.layers = layers;
+        this.mapBounds = mapBounds;
         this.rectangleSprite.visible = false;
         this.init();
+        this.city = null
         this.createCityPoints()
     }
     get mapSprite() {
         return this.rectangleSprite;
     }
+
+
     createCityPoints() {
         const cityPoints = [
             { name: "Seoul", x: -80, y: -220 },
@@ -69,13 +76,109 @@ export class KoreaMap {
             pointContainer.addChild(point);
             // Click event listener
             
-            pointContainer.addEventListener('pointerdown', (e) => this.onCityClick({ event: e, name: city.name }));
+            pointContainer.addEventListener('pointerdown', (e) => {
+                this.onRoomUpdate(city.name);
+            });
             this.korea.addChild(pointContainer);
         });
     }
-    
-    toggleVisibility () { 
-        toggle(this.rectangleSprite)
+    onRoomUpdate(option) {
+        const layers = this.layers
+        if (layers.background.children.length > 0) {
+            layers.background.removeChildren();
+        }
+        if (layers.ui.children.length > 0) {
+            for (const child of layers.ui.children) {
+                if(child.uid === 'KOREAMAP' || child.uid === 'table') {
+                    continue
+                }
+                layers.ui.removeChild(child);
+                child.destroy({ children: true });
+
+            }
+            const map = layers.ui.children.find(child => child.uid === 'KOREAMAP')
+            layers.ui.setChildIndex(map, layers.ui.children.length - 1);
+            layers.ui.addChild(map)
+            if(map.visible) {
+                map.visible = false;
+            }
+        }
+        
+        
+        const roomConfig = ROOM_CONFIGS[option];
+        if (!roomConfig) { 
+            console.warn("Unknown roomConfig", roomConfig)
+            return;
+        }
+
+        let background;
+
+        if (roomConfig.background) {
+            // Use the background texture from roomConfig
+            const backgroundTexture = PIXI.Texture.from(roomConfig.background);
+            background = new PIXI.Sprite(backgroundTexture);
+        } else {
+            // Create a black background if roomConfig.background is undefined
+            background = new PIXI.Sprite(PIXI.Texture.WHITE);
+            background.tint = 0x000000; // Set color to black
+        }
+
+        // Set background size and position
+        background.width = window.innerWidth;
+        background.height = window.innerHeight;
+        background.anchor.set(0.5);
+        layers.background.addChild(background);
+        if (roomConfig.interactives) {
+            for (const interactive of roomConfig.interactives) {
+                console.log(interactive)
+                const sprite = PIXI.Sprite.from(interactive.sprite);
+
+                sprite.anchor.set(0.5);
+                if(interactive.uid) {
+                    sprite.uid = interactive.uid;
+                }
+                if(interactive.position) {
+                    switch (interactive.position) {
+                        case 'top center': {
+                           sprite.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height);
+                        } break;
+                        case 'bot center': {
+                           sprite.position.set(app.canvas.width / 2, 10);
+                        } break;
+                    }
+                } else {
+                    sprite.position.set(interactive.x,interactive.y)
+                }
+                if(interactive.scale) {
+                    sprite.scale.set(interactive.scale);
+                }
+
+                if(interactive.type == 'info') {
+                    //sprite.interactionMessage = roomConfig.interactive.interaction;
+                    //
+                    layers.ui.addChild(sprite);
+                } else if (interactive.type == 'map') {
+    //                const koreaMap = new KoreaMap(app, ({ name }) => {
+    //                    onRoomUpdate(layers, name, mapBounds, app);
+    //                });
+    //
+    //                layers.ui.addChild(sprite);
+    //                layers.ui.addChild(koreaMap.rectangleSprite);
+                    //sprite.interactionMessage = roomConfig.interactive.interaction;
+                }
+                
+            }
+
+
+            // If character exists, update position relative to character
+            /*if (layers.characters.children.length > 0) {
+                const character = layers.characters.children[0];
+                interactive.x = character.x + 50;  // Offset from character
+                interactive.y = character.y + 50;  // Offset from character
+            }*/
+        } else {
+            console.warn("no interactives")
+        }
     }
 
     init() {
@@ -104,7 +207,6 @@ export class KoreaMap {
 
     createKoreaSprite() {
         // Ensure the texture scaling mode is set
-        PIXI.Assets.get('korea').baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
         
         // Create the sprite
         const korea = PIXI.Sprite.from('korea');
@@ -123,10 +225,36 @@ export class KoreaMap {
         ];
 
         cityData.forEach(city => {
-            const cityLabel = new PIXI.Text({ text: city.name, roundPixels: true,  fill: 0xFFFFFF, fontSize: 20 });
+            const cityLabel = new PIXI.Text({ 
+                text: city.name,
+                fill: 0xffffff,
+                fontSize: 20,
+                style: {
+                    fontFamily:'Space Mono',
+                    color: 'white'
+                }
+            });
             cityLabel.position.set(city.x, city.y);
             this.rectangleSprite.addChild(cityLabel);
         });
+    }
+    destroy( ){ 
+
+        if (this.ocean) {
+            this.ocean.destroy({ children: true });
+            this.ocean = null;
+        }
+        
+        if (this.korea) {
+            this.korea.destroy({ children: true });
+            this.korea = null;
+        }
+
+        // Destroy the main rectangle sprite container
+        if (this.rectangleSprite) {
+            this.rectangleSprite.destroy({ children: true });
+            this.rectangleSprite = null;
+        }
     }
 }
 

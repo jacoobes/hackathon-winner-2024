@@ -1,7 +1,7 @@
-import { onRoomUpdate, ROOM_CONFIGS } from './roomUpdates.js';
+import { ROOM_CONFIGS } from './roomUpdates.js';
 import { Graphics, Text, Container } from 'pixi.js';
 
-export function createMenu(layers) {
+export function createMenu(layers, koreaMap) {
     const menuWidth = 200;
     const menuHeight = window.innerHeight;
     let isOpen = false;
@@ -73,7 +73,7 @@ export function createMenu(layers) {
                     layers.background.removeChild(layers.background.children[0]);
                 }
                 // Call room update
-                onRoomUpdate(layers, option);
+                koreaMap.onRoomUpdate(option);
             }
         });
 

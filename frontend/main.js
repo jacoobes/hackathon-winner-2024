@@ -3,7 +3,7 @@ import { createRectangle, toggle , KoreaMap } from './map.js';
 import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet, TextureStyle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
-import { onRoomUpdate } from './roomUpdates.js';
+import { createTable } from './roomUpdates.js';
 import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
 
@@ -238,7 +238,6 @@ const initApp = async () => {
     mapRows * tileHeight
   );
   createMenu(layers);
-  onRoomUpdate(layers, 'Seoul');
   
   return { layers, app, spritesheet, mapBounds };
 };
@@ -357,20 +356,15 @@ const initApp = async () => {
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
 
-  const table = Sprite.from('table');
-  table.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height)
-  table.anchor.set(0.5);
-  table.scale.set(2);
-  table.uid = 'table'; // Assign a unique UID
+  const koreaMap = new KoreaMap(app, layers, mapBounds);
+  koreaMap.onRoomUpdate('Seoul');
+  const table = createTable(app, mapBounds);
+
   layers.ui.addChild(table);
-
-
-  const koreaMap = new KoreaMap(app, ({ event, name }) => {
-        onRoomUpdate(layers, name);
-  });
-
-  layers.ui.addChild(koreaMap.rectangleSprite);
-
+  layers.ui.addChild(koreaMap.rectangleSprite)
+  
+  koreaMap.city = "Seoul"
+  
   // movement speed
   const speed = 3.5;
 
@@ -387,19 +381,15 @@ const initApp = async () => {
     }
 
     // handle interaction on space bar press
-    if (event.code === 'Space' && !window.isPopupActive) {
+    if (event.code === 'Space' ) {
       for (const ui_el of layers.ui.children) {
         if (testForAABB(character.sprite, ui_el)) {
           if (ui_el.uid === 'table') {
-            koreaMap.toggleVisibility();
+            toggle(koreaMap.rectangleSprite);
             playSound('mapinteract'); // Play the map interaction sound
             break;
           }
 
-//          if (ui_el.uid != mapLayer.uid) {
-//            onInteract(app, ui_el, 'hello');
-//            break;
-//          }
         }
       }
     }
@@ -464,5 +454,5 @@ const initApp = async () => {
     }
   });
 
-  const menu = createMenu(layers);
+  const menu = createMenu(layers, koreaMap);
 })();
