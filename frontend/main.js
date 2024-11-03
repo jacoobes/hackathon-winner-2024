@@ -1,12 +1,10 @@
 import './style.css';
-import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES } from 'pixi.js';
-import { createRectangle, toggle , KoreaMap} from './map.js'
+import { createRectangle, toggle , KoreaMap } from './map.js';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, SpriteSheet } from 'pixi.js';
 import { onInteract } from './interactable.js';
-import SplashScreen from './SplashScreen.js'
+import SplashScreen from './SplashScreen.js';
 import { onRoomUpdate } from './roomUpdates.js';
-import { createMenu } from './menu.js'
-import { loadSounds, playSound } from './soundfx.js'
-
+import { createMenu } from './menu.js';
 
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
@@ -22,123 +20,228 @@ function testForAABB(object1, object2)
     );
 }
 
-
 function isWithinBounds(character, bounds) {
-    const characterBounds = character.getBounds();
-    return (
-        characterBounds.x >= bounds.x &&
-        characterBounds.x + characterBounds.width <= bounds.x + bounds.width &&
-        characterBounds.y >= bounds.y &&
-        characterBounds.y + characterBounds.height <= bounds.y + bounds.height
-    );
+  const characterBounds = character.getBounds();
+  return (
+    characterBounds.x >= bounds.x &&
+    characterBounds.x + characterBounds.width <= bounds.x + bounds.width &&
+    characterBounds.y >= bounds.y &&
+    characterBounds.y + characterBounds.height <= bounds.y + bounds.height
+  );
 }
 
+// global variables for key tracking
+const keys = {};
 
-// Main character
-class MainSprite extends Sprite {
-    constructor(texture, options) {
-        super(Assets.get(texture))
-        this.characterTextures = {
-            front : Assets.get('amogusfront'),
-            back : Assets.get('amogusfront'),
-            left : Assets.get('amogusfront'),
-            right : Assets.get('amogusfront'),
-        };
-        this.anchor.set(0.5);
-        this.x = options.app.screen.width / 2;
-        this.y = options.app.screen.height / 2;
-        this.scale.set(3.0);
-        this.eventMode = 'static';
-        this.cursor = 'pointer';
-        Assets.get(texture).baseTexture.scaleMode = SCALE_MODES.NEAREST
+// main character class using AnimatedSprite
+class MainSprite extends Container {
+  constructor(options) {
+    super();
+    this.spritesheet = options.spritesheet;
 
-    }
-    moveUp(speed) {
-        this.texture = this.characterTextures.front;
-        this.y -= speed;
-    }
+    // start with standSouth animation
+    this.sprite = new AnimatedSprite(this.spritesheet.animations['standSouth']);
+    this.sprite.anchor.set(0.5);
+    this.sprite.x = options.app.screen.width / 2;
+    this.sprite.y = options.app.screen.height / 2;
+    this.sprite.scale.set(3.0);
+    this.sprite.animationSpeed = 0.18;
+    this.sprite.loop = false;
+    this.sprite.eventMode = 'static';
+    this.sprite.cursor = 'pointer';
+    this.sprite.play();
 
-    moveDown(speed) {
-        this.texture = this.characterTextures.front;
-        this.y += speed;
-    }
+    // add animated sprite to the MainSprite container
+    this.addChild(this.sprite);
+  }
 
-    moveLeft(speed) {
-        this.texture = this.characterTextures.front;
-        this.x -= speed;
+  moveUp(speed) {
+    if (!this.sprite.playing || this.sprite.textures !== this.spritesheet.animations['walkNorth']) {
+      this.sprite.textures = this.spritesheet.animations['walkNorth'];
+      this.sprite.play();
     }
+    this.sprite.y -= speed;
+  }
 
-    moveRight(speed) {
-        this.texture = this.characterTextures.front;
-        this.x += speed;
+  moveDown(speed) {
+    if (!this.sprite.playing || this.sprite.textures !== this.spritesheet.animations['walkSouth']) {
+      this.sprite.textures = this.spritesheet.animations['walkSouth'];
+      this.sprite.play();
     }
+    this.sprite.y += speed;
+  }
+
+  moveLeft(speed) {
+    if (!this.sprite.playing || this.sprite.textures !== this.spritesheet.animations['walkWest']) {
+      this.sprite.textures = this.spritesheet.animations['walkWest'];
+      this.sprite.play();
+    }
+    this.sprite.x -= speed;
+  }
+
+  moveRight(speed) {
+    if (!this.sprite.playing || this.sprite.textures !== this.spritesheet.animations['walkEast']) {
+      this.sprite.textures = this.spritesheet.animations['walkEast'];
+      this.sprite.play();
+    }
+    this.sprite.x += speed;
+  }
+
+  standStill() {
+    if (this.sprite.playing) {
+      switch (this.sprite.textures) {
+        case this.spritesheet.animations['walkNorth']:
+          this.sprite.textures = this.spritesheet.animations['standNorth'];
+          break;
+        case this.spritesheet.animations['walkWest']:
+          this.sprite.textures = this.spritesheet.animations['standWest'];
+          break;
+        case this.spritesheet.animations['walkSouth']:
+          this.sprite.textures = this.spritesheet.animations['standSouth'];
+          break;
+        case this.spritesheet.animations['walkEast']:
+          this.sprite.textures = this.spritesheet.animations['standEast'];
+          break;
+      }
+      this.sprite.gotoAndStop(0); // show standing frame
+    }
+  }
+
+  get x() {
+    return this.sprite.x;
+  }
+
+  set x(value) {
+    this.sprite.x = value;
+  }
+
+  get y() {
+    return this.sprite.y;
+  }
+
+  set y(value) {
+    this.sprite.y = value;
+  }
+
+  get width() {
+    return this.sprite.width;
+  }
+
+  get height() {
+    return this.sprite.height;
+  }
+
+  getBounds() {
+    return this.sprite.getBounds();
+  }
 }
 
 const initApp = async () => {
-  await document.fonts.load("10pt 'Monocraft'");
-  const app = new Application();
-  await app.init({
-    background: '#1099bb',
-    resizeTo: window,
-  })
+    const app = new Application();
+    await app.init({
+      background: '#1099bb',
+      resizeTo: window,
+    });
 
-  document.body.appendChild(app.canvas); // Use app.view to append the canvas
-  const splash = new SplashScreen(app, {})
+  document.body.appendChild(app.canvas);
+  const splash = new SplashScreen(app, {});
 
-  await splash.loadAssets([ 
-      { alias: 'korea', src: '/assets/korea.png' },
-      { alias: 'amogusfront', src: '/assets/xak.png' },
-      { alias: 'amogusback', src: '/assets/gojodrink.png'}, //change to actual back
-      { alias: 'amogusleft', src: '/assets/Red_Amogus.png'}, //change to actual left
-      { alias: 'amogusright', src: '/assets/back_hover.png'}, //change to actual right
-      { alias: 'floor', src: '/assets/wood.png' }, //floor
-      { alias: 'meat', src: '/assets/meat.png' },
-      { alias: 'mainBackground', src: '/assets/seoultower.png'},
-      { alias: 'background1', src: '/assets/skysunset.png'}
-  ])
+  await splash.loadAssets([
+    { alias: 'korea', src: '/assets/korea.png' },
+    { alias: 'floor', src: '/assets/wood.png' },
+    { alias: 'meat', src: '/assets/meat.png' },
+    { alias: 'mainBackground', src: '/assets/seoultower.png' },
+    { alias: 'background1', src: '/assets/skysunset.png' },
+    { alias: 'sprite', src: '/assets/spritesheet.png'}
+  ]);
 
-  loadSounds();
+  const w = 34;
+  const h = 34;
+
+  const atlasData = {
+    frames: {
+      // standin frames
+      'standSouth': { frame: { x: 1 * w, y: 0, w: w, h: h } }, // x=34
+      'standWest': { frame: { x: 4 * w, y: 0, w: w, h: h } },  // x=136
+      'standEast': { frame: { x: 7 * w, y: 0, w: w, h: h } },  // x=238
+      'standNorth': { frame: { x: 10 * w, y: 0, w: w, h: h } },// x=340
+
+      // walk south frames
+      'walkSouth_0': { frame: { x: 0 * w, y: 0, w: w, h: h } },// x=0
+      'walkSouth_1': { frame: { x: 1 * w, y: 0, w: w, h: h } },// x=34
+      'walkSouth_2': { frame: { x: 2 * w, y: 0, w: w, h: h } },// x=68
+
+      // walk west frames
+      'walkWest_0': { frame: { x: 3 * w, y: 0, w: w, h: h } },// x=102
+      'walkWest_1': { frame: { x: 4 * w, y: 0, w: w, h: h } },// x=136
+      'walkWest_2': { frame: { x: 5 * w, y: 0, w: w, h: h } },// x=170
+
+      // walk east frames
+      'walkEast_0': { frame: { x: 6 * w, y: 0, w: w, h: h } },// x=204
+      'walkEast_1': { frame: { x: 7 * w, y: 0, w: w, h: h } },// x=238
+      'walkEast_2': { frame: { x: 8 * w, y: 0, w: w, h: h } },// x=272
+
+      // walk north frames
+      'walkNorth_0': { frame: { x: 9 * w, y: 0, w: w, h: h } },// x=306
+      'walkNorth_1': { frame: { x: 10 * w, y: 0, w: w, h: h } },// x=340
+      'walkNorth_2': { frame: { x: 11 * w, y: 0, w: w, h: h } },// x=374
+    },
+    animations: {
+      'standSouth': ['standSouth'],
+      'standWest': ['standWest'],
+      'standEast': ['standEast'],
+      'standNorth': ['standNorth'],
+      'walkSouth': ['walkSouth_0', 'walkSouth_1', 'walkSouth_2'],
+      'walkWest': ['walkWest_0', 'walkWest_1', 'walkWest_2'],
+      'walkEast': ['walkEast_0', 'walkEast_1', 'walkEast_2'],
+      'walkNorth': ['walkNorth_0', 'walkNorth_1', 'walkNorth_2'],
+    },
+    meta: {
+      image: '/assets/spritesheet.png',
+    },
+  };
+
+  // create Spritesheet instance
+  const ssheetTexture = Texture.from(atlasData.meta.image);
+  const spritesheet = new Spritesheet(ssheetTexture, atlasData);
+  await spritesheet.parse();
 
   const layers = {
     background: new Container(),
     flooring: new Container(),
     menu: new Container(),
     characters: new Container(),
-    ui: new Container()
-  }
- // Add layers to stage in order (bottom to top)
-  Object.values(layers).forEach(layer => {
-        app.stage.addChild(layer);
+    ui: new Container(),
+  };
+  // add layers to stage in order (bottom to top)
+  Object.values(layers).forEach((layer) => {
+    app.stage.addChild(layer);
   });
 
   createMenu(layers);
   onRoomUpdate(layers, 'mainBackground');
 
-  return { layers, app }
+  return { layers, app, spritesheet };
+};
 
-}
-
-// Create a new PixiJS application
+// create new PixiJS application
 (async () => {
-  const { layers, app } = await initApp();
+  const { layers, app, spritesheet } = await initApp();
 
-  //initialize floor
+  // initialize floor
   const floorSprite = Sprite.from('floor');
-  layers.flooring.addChild(floorSprite)
+  layers.flooring.addChild(floorSprite);
 
   let mapBounds;
 
-  // Load the floor first
-  // Create a container for the map
-
-  // Define the size and layout of the flooring
+  // define the size and layout of the flooring
   const tileWidth = 64;
   const tileHeight = 64;
   const mapRows = 10;
   const mapCols = 10;
 
-  const centerX = (app.screen.width/2); //Use these for centering
-  const centerY = (app.screen.height/2); //Use these for centering
+  const centerX = app.screen.width / 2; 
+  const centerY = app.screen.height / 2; 
 
   layers.background.x = centerX;
   layers.background.y = centerY;
@@ -163,98 +266,105 @@ const initApp = async () => {
     mapRows * tileHeight
   );
 
-  const character = new MainSprite('amogusfront', { app })
+  const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
-  //character.position.set(centerX, centerY); //might be unnecessary
 
-  /*const meat = Sprite.from('meat')
-  meat.x = character.x + 50
-  meat.scale.set(3)
-  meat.y = character.y + 50
-  layers.ui.addChild(meat)*/
+  const table = Sprite.from('meat');
+  table.x = app.canvas.width / 2;
+  table.y = app.canvas.height - mapBounds.height;
+  table.anchor.set(0.5);
+  layers.ui.addChild(table);
 
-  const table = Sprite.from('meat')
-  table.x = app.view.width / 2
-  table.y =  app.view.height - mapBounds.height 
-  table.anchor.set(0.5)
-  layers.ui.addChild(table)
-
-  const mapLayer = createRectangle(app, { x: centerX,
-                                          y: centerY,
-                                          borderRadius: 50,
-                                          outline: { thickness: 6, color: 0x000080 },
-                                          width: 500,
-                                          height: 500 })
+  const mapLayer = createRectangle(app, {
+    x: centerX,
+    y: centerY,
+    borderRadius: 50,
+    outline: { thickness: 6, color: 0x000080 },
+    width: 500,
+    height: 500,
+  });
   mapLayer.visible = false;
-  mapLayer.anchor.set(0.5)
-  const koreaMap = new KoreaMap(app, mapLayer, ({ name, event }) => {
-    switch (name) {
-        case 'Seoul': {
-            onRoomUpdate(layers, 'Seoul')
-        } break;
-        case 'Busan': {
-            onRoomUpdate(layers, 'Busan')
-        } break;
-        case 'Jeju Island': {
-            onRoomUpdate(layers, 'Jeju Island')
-        } break;
+  mapLayer.anchor.set(0.5);
+  const koreaMap = new KoreaMap(app, mapLayer);
+
+  mapLayer.eventMode = 'static';
+  layers.ui.addChild(mapLayer);
+
+  // movement speed
+  const speed = 3.5;
+
+  // function to hide the mapLayer
+function hideMapLayerOnMove() {
+    if (mapLayer.visible) {
+      mapLayer.visible = false;
     }
-  })
+  }  
 
-  mapLayer.eventMode  = 'static'
-  layers.ui.addChild(mapLayer) 
-
-  const speed = 24
-  
-  // Movement logic
+  // key tracking
   window.addEventListener('keydown', (event) => {
+    keys[event.code] = true;
+
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
+        hideMapLayerOnMove();
+      }
+
+    // handle interaction on space bar press
+    if (event.code === 'Space') {
+      for (const ui_el of layers.ui.children) {
+        if (testForAABB(character.sprite, ui_el)) {
+          if (ui_el.uid == table.uid) {
+            koreaMap.toggleVisibility();
+            break;
+          }
+
+          if (ui_el.uid != mapLayer.uid) {
+            onInteract(app, ui_el, 'hello');
+            break;
+          }
+        }
+      }
+    }
+  });
+
+
+  window.addEventListener('keyup', (event) => {
+    keys[event.code] = false;
+  });
+
+  // game loop for movement and animation
+  app.ticker.add((delta) => {
+    let moving = false;
+
     const oriX = character.x;
     const oriY = character.y;
 
-    switch (event.key) {
-        case 'ArrowUp':
-            character.moveUp(speed);
-            playSound('woodsteps');
-            break;
-        case 'ArrowDown':
-            character.moveDown(speed);
-            playSound('woodsteps');
-            break;
-        case 'ArrowLeft':
-            character.moveLeft(speed);
-            playSound('woodsteps');
-            break;
-        case 'ArrowRight':
-            character.moveRight(speed);
-            playSound('woodsteps');
-            break;
-        case ' ': //space key
-            for (const ui_el of layers.ui.children) {
-              
-                if(testForAABB(character, ui_el)){ 
-                    if(ui_el.uid == table.uid) {
-                        koreaMap.toggleVisibility()
-                        break; 
-                    }
-                    
-                    if(ui_el.uid != mapLayer.uid && window.isPopupActive == false) {
-                        onInteract(app, ui_el, "Kimchi is pretty good. It's both rich in flavor and in culture. mmmm kimchi. I could really use some kimchi right now, but i don't really want kimchi. But kimchi sounds so good rn. Maybe next time I'll get some Kimchi to eat. ")
-                        break;
-                    }
-                }
-            }
-            //if item nearby
-            // open menu
-            break;
-        default:
-            console.log(event.key)
-            break;
+    if (keys['ArrowUp'] || keys['KeyW']) {
+      character.moveUp(speed);
+      moving = true;
     }
-    if (!isWithinBounds(character, mapBounds)) {
-        character.x = oriX;
-        character.y = oriY;
+    if (keys['ArrowDown'] || keys['KeyS']) {
+      character.moveDown(speed);
+      moving = true;
+    }
+    if (keys['ArrowLeft'] || keys['KeyA']) {
+      character.moveLeft(speed);
+      moving = true;
+    }
+    if (keys['ArrowRight'] || keys['KeyD']) {
+      character.moveRight(speed);
+      moving = true;
     }
 
+    if (!moving) {
+      character.standStill();
+    }
+
+    // check bounds
+    if (!isWithinBounds(character.sprite, mapBounds)) {
+      character.x = oriX;
+      character.y = oriY;
+    }
   });
+
   const menu = createMenu(layers);
 })();
