@@ -15,13 +15,27 @@ export const toggle = (x) => {
 
 
 export class KoreaMap {
-    constructor(app, rectangleSprite, onCityClick) {
+    constructor(app, centerX, centerY, onCityClick) {
         this.app = app;
-        this.rectangleSprite = rectangleSprite;
+        const mapLayer = createRectangle(app, {
+            x: centerX,
+            y: centerY,
+            borderRadius: 50,
+            outline: { thickness: 6, color: 0x000080 },
+            width: 500,
+            height: 500,
+          });
+        mapLayer.visible = false;
+        mapLayer.anchor.set(0.5);
+        mapLayer.eventMode = 'static';
+        this.rectangleSprite = mapLayer;
         this.onCityClick = onCityClick
 
         this.init();
         this.createCityPoints()
+    }
+    get mapSprite() {
+        return this.rectangleSprite;
     }
     createCityPoints() {
         const cityPoints = [

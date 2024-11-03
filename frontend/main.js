@@ -1,12 +1,13 @@
 import './style.css';
 import { createRectangle, toggle , KoreaMap } from './map.js';
-import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet } from 'pixi.js';
+import { AnimatedSprite, Application, Assets, Sprite, Container, Rectangle, SCALE_MODES, Texture, Spritesheet, TextureStyle } from 'pixi.js';
 import { onInteract } from './interactable.js';
 import SplashScreen from './SplashScreen.js';
 import { onRoomUpdate } from './roomUpdates.js';
 import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
 
+TextureStyle.defaultOptions.scaleMode = 'nearest';
 //generic collision detection between two sprites
 function testForAABB(object1, object2)
 {
@@ -153,7 +154,10 @@ const initApp = async () => {
     { alias: 'meat', src: '/assets/meat.png' },
     { alias: 'mainBackground', src: '/assets/seoultower.png' },
     { alias: 'background1', src: '/assets/skysunset.png' },
-    { alias: 'sprite', src: '/assets/spritesheet.png'}
+    { alias: 'sprite', src: '/assets/spritesheet.png'},
+    { alias: 'table', src: '/assets/table.png'},
+    { alias: 'pin', src: '/assets/pin.png'}
+
   ]);
   loadSounds()
   const w = 34;
@@ -204,7 +208,6 @@ const initApp = async () => {
 
   // create Spritesheet instance
   const ssheetTexture = Texture.from(atlasData.meta.image);
-  ssheetTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
   const spritesheet = new Spritesheet(ssheetTexture, atlasData);
   await spritesheet.parse();
 
@@ -271,56 +274,35 @@ const initApp = async () => {
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
 
-  const table = Sprite.from('meat');
-  table.x = app.canvas.width / 2;
-  table.y = app.canvas.height - mapBounds.height;
+  const table = Sprite.from('table');
+  table.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height)
   table.anchor.set(0.5);
+  table.scale.set(2);
   layers.ui.addChild(table);
 
-  const mapLayer = createRectangle(app, {
-    x: centerX,
-    y: centerY,
-    borderRadius: 50,
-    outline: { thickness: 6, color: 0x000080 },
-    width: 500,
-    height: 500,
-  });
-  mapLayer.visible = false;
-  mapLayer.anchor.set(0.5);
-  const koreaMap = new KoreaMap(app, mapLayer, ({ event, name }) => {
-
+  const koreaMap = new KoreaMap(app, centerX, centerY, ({ event, name }) => {
         onRoomUpdate(layers, name);
-//        switch(name) {
-//            case 'Seoul': {
-//            }break;
-//            case 'Busan': { } break;
-//            case 'Jeju Island': { } break;
-//        }
   });
 
-  mapLayer.eventMode = 'static';
-  layers.ui.addChild(mapLayer);
+  layers.ui.addChild(koreaMap.rectangleSprite);
 
   // movement speed
   const speed = 3.5;
 
   // function to hide the mapLayer
-function hideMapLayerOnMove() {
-    if (mapLayer.visible) {
-      mapLayer.visible = false;
-    }
-  }  
 
   // key tracking
   window.addEventListener('keydown', (event) => {
     keys[event.code] = true;
 
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
-        hideMapLayerOnMove();
+        if(koreaMap.rectangleSprite.visible) {
+            koreaMap.rectangleSprite.visible = false
+        }
       }
 
     // handle interaction on space bar press
-    if (event.code === 'Space') {
+    if (event.code === 'Space' && !window.isPopupActive) {
       for (const ui_el of layers.ui.children) {
         if (testForAABB(character.sprite, ui_el)) {
           if (ui_el.uid == table.uid) {
@@ -328,10 +310,10 @@ function hideMapLayerOnMove() {
             break;
           }
 
-          if (ui_el.uid != mapLayer.uid) {
-            onInteract(app, ui_el, 'hello');
-            break;
-          }
+//          if (ui_el.uid != mapLayer.uid) {
+//            onInteract(app, ui_el, 'hello');
+//            break;
+//          }
         }
       }
     }
@@ -378,6 +360,11 @@ function hideMapLayerOnMove() {
       stopSound('woodsteps'); // Make sure to implement this function in `soundfx.js`
       isMovingSoundPlaying = false;
     }
+    if(testForAABB(table, character.sprite)) {
+        moving = false;
+    }
+    // only play sound if moving
+    //moving && playSound('woodsteps')
 
     if (!moving) {
       character.standStill();
