@@ -18,7 +18,6 @@ export function createMenu(layers, koreaMap) {
     menuBackground.position.set(-menuWidth, 0);
     menuContainer.addChild(menuBackground);
 
-    // Create title
     const title = new Text('Select Background', {
         fill: '#000',
         fontSize: 20,
@@ -29,46 +28,36 @@ export function createMenu(layers, koreaMap) {
 
     const options = Object.keys(ROOM_CONFIGS);
 
-    // Make buttons interactive
+    // Create buttons with press effect
     options.forEach((option, index) => {
-        const button = new Text(option, {
+        const buttonContainer = new Container();
+        buttonContainer.interactive = true;
+        buttonContainer.buttonMode = true;
+        buttonContainer.position.set(10, 90 + index * 40);
+
+        const buttonBackground = new Graphics();
+        buttonBackground.beginFill(0xeeeeee);
+        buttonBackground.drawRect(0, 0, menuWidth - 20, 30);
+        buttonBackground.endFill();
+
+        const buttonText = new Text(option, {
             fill: '#000',
             fontSize: 16,
         });
+        buttonText.position.set(10, 5);
 
-        // Make the button interactive
-        button.interactive = true;
-        button.buttonMode = true;
+        // Add hover and press effects
+        buttonContainer.on('mouseover', () => buttonBackground.tint = 0xdddddd);
+        buttonContainer.on('mouseout', () => buttonBackground.tint = 0xffffff);
 
-        // Create a hit area for better click detection
-        const padding = 10;
-        const buttonBackground = new Graphics();
-        buttonBackground.beginFill(0xeeeeee);
-        buttonBackground.drawRect(
-            0,
-            0,
-            menuWidth - 20,
-            30
-        );
-        buttonBackground.endFill();
-        buttonBackground.position.set(10, 90 + index * 40);
+        // Add "pressed" effect on pointer down and up
+        buttonContainer.on('pointerdown', () => {
+            buttonContainer.scale.set(0.95);
+        });
 
-        // Position text on top of background
-        button.position.set(
-            buttonBackground.position.x + padding,
-            buttonBackground.position.y + 5
-        );
-
-        // Add hover effects
-        buttonBackground.interactive = true;
-        buttonBackground.buttonMode = true;
-        buttonBackground.on('mouseover', () => buttonBackground.tint = 0xdddddd);
-        buttonBackground.on('mouseout', () => buttonBackground.tint = 0xffffff);
-
-        // Add click handler
-        buttonBackground.on('pointerdown', () => {
+        buttonContainer.on('pointerup', () => {
+            buttonContainer.scale.set(1);
             if (layers.background) {
-                // Clear existing background
                 while (layers.background.children.length > 0) {
                     layers.background.removeChild(layers.background.children[0]);
                 }
@@ -77,20 +66,21 @@ export function createMenu(layers, koreaMap) {
             }
         });
 
-        menuBackground.addChild(buttonBackground);
-        menuBackground.addChild(button);
+        buttonContainer.on('pointerupoutside', () => {
+            buttonContainer.scale.set(1);
+        });
+
+        buttonContainer.addChild(buttonBackground);
+        buttonContainer.addChild(buttonText);
+        menuBackground.addChild(buttonContainer);
     });
 
-    // Create toggle button using PixiJS
     const toggleButton = new Container();
-
-    // Toggle button background
     const toggleBackground = new Graphics();
     toggleBackground.beginFill(0x4a90e2);
     toggleBackground.drawRoundedRect(0, 0, 60, 30, 5);
     toggleBackground.endFill();
 
-    // Toggle button text
     const toggleText = new Text('Menu', {
         fill: '#ffffff',
         fontSize: 16,
@@ -104,25 +94,20 @@ export function createMenu(layers, koreaMap) {
     toggleButton.addChild(toggleText);
     toggleButton.position.set(10, 10);
 
-    // Make toggle button interactive
     toggleButton.interactive = true;
     toggleButton.buttonMode = true;
 
-    // Add hover effects
     toggleButton.on('mouseover', () => toggleBackground.tint = 0x357abd);
-    toggleButton.on('mouseout', () => toggleBackground.tint = 0xffffff);
+    toggleButton.on('mouseout', () => toggleBackground.tint = 0x4a90e2);
 
-    // Handle toggle click with animation lock
     toggleButton.on('pointerdown', () => {
-        if (isAnimating) return; // Prevent multiple animations
-
+        if (isAnimating) return;
         isAnimating = true;
         isOpen = !isOpen;
         const targetX = isOpen ? 0 : -menuWidth;
         let startTime = null;
-        const animationDuration = 200; // Animation duration in milliseconds
+        const animationDuration = 200;
 
-        // Animate using requestAnimationFrame with timing control
         function animate(timestamp) {
             if (!startTime) startTime = timestamp;
             const progress = (timestamp - startTime) / animationDuration;
@@ -134,9 +119,8 @@ export function createMenu(layers, koreaMap) {
                 menuBackground.position.x = currentX;
                 requestAnimationFrame(animate);
             } else {
-                // Ensure we end exactly at the target position
                 menuBackground.position.x = targetX;
-                isAnimating = false; // Release animation lock
+                isAnimating = false;
             }
         }
 

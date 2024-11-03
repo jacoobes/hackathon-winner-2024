@@ -154,14 +154,22 @@ const initApp = async () => {
 
   await splash.loadAssets([
     { alias: 'korea', src: '/assets/korea.png' },
-    { alias: 'floor', src: '/assets/floorv5.png' },
+    { alias: 'floor', src: '/assets/floorv6.png' },
     { alias: 'meat', src: '/assets/meat.png' },
     { alias: 'mainBackground', src: '/assets/seoultower.png' },
     { alias: 'background1', src: '/assets/skysunset.png' },
     { alias: 'sprite', src: '/assets/spritesheet.png'},
     { alias: 'table', src: '/assets/table.png'},
     { alias: 'pin', src: '/assets/pin.png'},
-    { alias: 'wall', src: '/assets/wallv1.png'},
+    { alias: 'bordernorth', src: '/assets/bordernorth.png'},
+    { alias: 'bordersouth', src: '/assets/bordersouth.png'},
+    { alias: 'borderwest', src: '/assets/borderwest.png'},
+    { alias: 'bordereast', src: '/assets/bordereast.png'},
+    { alias: 'cornerNW', src: '/assets/cornerNW.png'},
+    { alias: 'cornerNE', src: '/assets/cornerNE.png'},
+    { alias: 'cornerSW', src: '/assets/cornerSW.png'},
+    { alias: 'cornerSE', src: '/assets/cornerSE.png'},
+    { alias: 'wallnorth', src: '/assets/wallv1.png'},
     { alias: 'wallside', src: '/assets/wallside.png'}
   ]);
   loadSounds()
@@ -259,36 +267,78 @@ const initApp = async () => {
   layers.flooring.x = app.centerX;
   layers.flooring.y = app.centerY;
 
-  function createWall(x, y, isNorthWall = false) {
+  function createWall(x, y, orientation) {
       const wall = new Container();
+      let wallSprite;
 
-      if (isNorthWall) {
-          // Taller north wall
-          const wallFront = Sprite.from('wall');
-          wallFront.width = 64;
-          wallFront.height = 96; // Much taller for north wall
-          wallFront.anchor.set(0.5);
-          wall.addChild(wallFront);
+      // Choose asset based on orientation
+      if (orientation === 'north') {
+          wallSprite = Sprite.from('wallnorth'); // Asset for north wall
+          wallSprite.width = 64;
+          wallSprite.height = 128;
+          wallSprite.anchor.set(0);
+      } else if (orientation === 'south') {
+          wallSprite = Sprite.from('bordersouth'); // New asset for south wall
+          wallSprite.width = 64; // Adjust width as needed
+          wallSprite.height = 10; // Height can be adjusted if different
+          wallSprite.anchor.set(0);
+      } else if (orientation === 'west') {
+          wallSprite = Sprite.from('wallside'); // Asset for west wall
+          wallSprite.width = 32; // Slimmer for west wall
+          wallSprite.height = 240;
+          wallSprite.anchor.set(0); // Anchor to the left for west wall
       } else {
-          // Side and bottom walls
-          const wallFront = Sprite.from('wallside');
-          wallFront.width = 32; // Slimmer for side walls
-          wallFront.height = 64;
-          wallFront.anchor.set(1);
-          wall.addChild(wallFront);
+          wallSprite = Sprite.from('wallside'); // Asset for east wall
+          wallSprite.width = 32; // Slimmer for east wall
+          wallSprite.height = 240;
+          wallSprite.anchor.set(0); // Anchor to the left for east wall
       }
 
+      wall.addChild(wallSprite);
+
       // Adjust wall position to align with tiles
-      wall.position.set(x + tileWidth/2, y);
+      wall.position.set(x, y);
       return wall;
   }
+
+  /*const createCorner = (x, y, cornerType, cornerWidth, cornerHeight) => {
+      const corner = new Container();
+      let cornerSprite;
+
+      // Choose corner asset based on corner type
+      switch (cornerType) {
+          case 'NW':
+              cornerSprite = Sprite.from('cornerNW'); // Top-left corner
+              break;
+          case 'NE':
+              cornerSprite = Sprite.from('cornerNE'); // Top-right corner
+              break;
+          case 'SW':
+              cornerSprite = Sprite.from('cornerSW'); // Bottom-left corner
+              break;
+          case 'SE':
+              cornerSprite = Sprite.from('cornerSE'); // Bottom-right corner
+              break;
+      }
+
+      // Scale the corner sprite
+      cornerSprite.width = cornerWidth;
+      cornerSprite.height = cornerHeight;
+
+      corner.addChild(cornerSprite);
+      corner.position.set(x, y);
+      return corner;
+  }*/
 
   const createWalls = (mapCols, mapRows, layers) => {
       const walls = [];
       const mapWidth = mapCols * tileWidth;
       const mapHeight = mapRows * tileHeight;
 
-      // First create floor tiles (including corners)
+      //const cornerWidth = 13; // Set desired width for corners
+      //const cornerHeight = 20; // Set desired height for corners
+
+      // Create floor tiles
       for (let row = 0; row <= mapRows - 1; row++) {
           for (let col = 0; col <= mapCols - 1; col++) {
               const tileSprite = Sprite.from('floor');
@@ -299,12 +349,12 @@ const initApp = async () => {
           }
       }
 
-      // Create north walls (taller)
+      // Create north walls
       for (let col = 0; col < mapCols; col++) {
           walls.push(createWall(
               col * tileWidth - (mapWidth / 2),
-              -mapHeight / 2,
-              true
+              -(app.screen.height / 2), // Adjust the Y position to 64 (half of the wall height)
+              'north'
           ));
       }
 
@@ -312,7 +362,8 @@ const initApp = async () => {
       for (let col = 0; col < mapCols; col++) {
           walls.push(createWall(
               col * tileWidth - (mapWidth / 2),
-              mapHeight / 2
+              mapHeight / 2,
+              'south'
           ));
       }
 
@@ -320,7 +371,8 @@ const initApp = async () => {
       for (let row = 0; row < mapRows; row++) {
           walls.push(createWall(
               -mapWidth / 2,
-              row * tileHeight - (mapHeight / 2)
+              row * tileHeight - (mapHeight / 2) - 90,
+              'west'
           ));
       }
 
@@ -328,20 +380,18 @@ const initApp = async () => {
       for (let row = 0; row < mapRows; row++) {
           walls.push(createWall(
               mapWidth / 2,
-              row * tileHeight - (mapHeight / 2)
+              row * tileHeight - (mapHeight / 2) - 90,
+              'east'
           ));
       }
 
-      // Add corner pieces to ensure complete coverage
-      const corners = [
-          createWall(-mapWidth / 2, -mapHeight / 2), // Top-left
-          createWall(mapWidth / 2, -mapHeight / 2),  // Top-right
-          createWall(-mapWidth / 2, mapHeight / 2),  // Bottom-left
-          createWall(mapWidth / 2, mapHeight / 2)    // Bottom-right
-      ];
+      // Add corner pieces with specified width and height
+     /* walls.push(createCorner(-mapWidth / 2, -mapHeight / 2, 'NW', cornerWidth, cornerHeight)); // Top-left
+      walls.push(createCorner((mapWidth / 2 - cornerWidth) + 13, -mapHeight / 2, 'NE', cornerWidth, cornerHeight)); // Top-right
+      walls.push(createCorner(-mapWidth / 2, (mapHeight / 2 - cornerHeight) + 13, 'SW', cornerWidth, cornerHeight - 3)); // Bottom-left
+      walls.push(createCorner((mapWidth / 2 - cornerWidth) + 13, mapHeight / 2 - cornerHeight, 'SE', cornerWidth, cornerHeight+10)); // Bottom-right
 
-      walls.push(...corners);
-
+      // Add walls to the layer*/
       walls.forEach(wall => layers.flooring.addChild(wall));
   };
 
@@ -351,7 +401,6 @@ const initApp = async () => {
 
   initializeRoom(mapCols, mapRows, layers);
 
-  
 
   const character = new MainSprite({ app, spritesheet });
   layers.characters.addChild(character);
