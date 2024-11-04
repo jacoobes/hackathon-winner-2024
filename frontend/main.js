@@ -6,7 +6,7 @@ import SplashScreen from './SplashScreen.js';
 import { createTable } from './roomUpdates.js';
 import { createMenu } from './menu.js';
 import { loadSounds, playSound, stopSound } from './soundfx.js'
-
+let bgmIsPlaying = true;
 TextureStyle.defaultOptions.scaleMode = 'nearest';
   const tileWidth = 64;
   const tileHeight = 64;
@@ -161,24 +161,23 @@ const initApp = async () => {
     { alias: 'sprite', src: '/assets/spritesheet.png'},
     { alias: 'table', src: '/assets/table.png'},
     { alias: 'pin', src: '/assets/pin.png'},
-    { alias: 'bordernorth', src: '/assets/bordernorth.png'},
-    { alias: 'bordersouth', src: '/assets/bordersouth.png'},
-    { alias: 'borderwest', src: '/assets/borderwest.png'},
-    { alias: 'bordereast', src: '/assets/bordereast.png'},
-    { alias: 'cornerNW', src: '/assets/cornerNW.png'},
-    { alias: 'cornerNE', src: '/assets/cornerNE.png'},
-    { alias: 'cornerSW', src: '/assets/cornerSW.png'},
-    { alias: 'cornerSE', src: '/assets/cornerSE.png'},
     { alias: 'wallnorth', src: '/assets/wallv1.png'},
-    { alias: 'wallside', src: '/assets/wallside.png'},
-    { alias: 'tableseoul', src: '/assets/table-seoul.png' },
+    { alias: 'wallside', src: '/assets/wallside.png'}, { alias: 'tableseoul', src: '/assets/table-seoul.png' },
     { alias: 'tablebusan', src: '/assets/table-busan.png' },
     { alias: 'koreanflag', src: '/assets/koreanflag.png' },
     { alias: 'fhanbok', src: '/assets/fhanbok.png' },
     { alias: 'mhanbok', src: '/assets/mhanbok.png' },
-    { alias: 'myeongdong', src: '/assets/myeongdong.png' }
+    { alias: 'myeongdong', src: '/assets/myeongdong.png' },
+    { alias: 'palm', src: '/assets/palm.png' },
+    { alias: 'table-jeju', src: '/assets/table-jeju.png' },
+    { alias: 'busan-boat', src: '/assets/busan-boat.png' },
+    { alias: 'busan-zombie', src: '/assets/busan-zombie.png' },
+    { alias: 'bed', src: '/assets/bed.png' },
+    { alias: 'gf', src: '/assets/girlfriend.png' }
+    //{ alias: 'busan-arch', src: '/assets/busan-arch.png' }
   ]);
   loadSounds()
+  playSound('bgm', 1, true, 0.1)
   const w = 34;
   const h = 34;
 
@@ -224,7 +223,33 @@ const initApp = async () => {
       image: '/assets/spritesheet.png',
     },
   };
+    
+  const muteButton = document.createElement('button');
+  muteButton.textContent = 'Mute';
+  muteButton.style.position = 'absolute';
+  muteButton.style.top = '10px';
+  muteButton.style.right = '10px';
+  muteButton.disabled = true; // Initially disable the button
 
+  document.body.appendChild(muteButton);
+
+  // Enable the button on mouseover, disable it on mouseout
+  muteButton.addEventListener('mouseover', () => {
+      muteButton.disabled = false;
+  });
+  muteButton.addEventListener('mouseout', () => {
+      muteButton.disabled = true;
+  });
+  muteButton.addEventListener('click', () => {
+      if (bgmIsPlaying) {
+          stopSound('bgm');
+          muteButton.textContent = 'Unmute';
+      } else {
+          playSound('bgm', 1, true, 0.1);
+          muteButton.textContent = 'Mute';
+      }
+      bgmIsPlaying = !bgmIsPlaying;
+  });
   // create Spritesheet instance
   const ssheetTexture = Texture.from(atlasData.meta.image);
   const spritesheet = new Spritesheet(ssheetTexture, atlasData);
@@ -412,7 +437,7 @@ const initApp = async () => {
   layers.characters.addChild(character);
 
   const koreaMap = new KoreaMap(app, layers, mapBounds);
-  koreaMap.onRoomUpdate('Seoul');
+  koreaMap.onRoomUpdate('Home');
   const table = createTable(app, mapBounds);
 
   layers.ui.addChild(table);
@@ -444,6 +469,65 @@ const initApp = async () => {
             playSound('mapinteract'); // Play the map interaction sound
             break;
           }
+          if (ui_el.uid === 'palm') {
+              onInteract(app, ui_el, "Jeju island is known for their beaches")
+              break;
+          }
+          if (ui_el.uid === 'fhanbok') {
+              const message = "This is a hanbok from Gyeongbokgung Palace. " +
+              "The grandest of Seoul's five palaces, dating back to the Joseon Dynasty, with changing of the guard ceremonies and beautiful gardens."
+
+              onInteract(app, ui_el, message)
+              break;
+          }
+
+          if (ui_el.uid == 'gf') {
+              onInteract(app, ui_el, "I love you. Lets go to KOREA!!! (Click on the map in the middle of the room");
+              break;
+          }
+          if (ui_el.uid == 'tableseoul') {
+              const foods = [
+                  "Kimchi",
+                  "Tteokbokki",
+                  "Samgyeopsal",
+                  "Korean Fried Chicken"
+              ];
+              onInteract(app, ui_el, "Table contains many delicious Korean foods: " + foods.join(","));
+              break;
+
+          }
+          if (ui_el.uid == 'tablebusan') {
+              const foods = [
+                  "Sashimi (Hoe)",
+                  "Grilled Eel (Jangeo-gui)",
+                  "Busan-style Dwaeji Gukbap",
+                  "Bindaetteok (Mung Bean Pancakes)"
+              ];
+              onInteract(app, ui_el, "Table contains many delicious Korean foods: " + foods.join(","));
+
+              break
+          }
+          if (ui_el.uid == 'tablejeju') {
+              const foods = [
+                  "Sashimi (Hoe)",
+                  "Grilled Eel (Jangeo-gui)",
+                  "Busan-style Dwaeji Gukbap",
+                  "Bindaetteok (Mung Bean Pancakes)"
+              ];
+              onInteract(app, ui_el, "Table contains many delicious Korean foods: " + foods.join(","));
+
+              break
+          }
+          if (ui_el.uid === 'tablejeju') {
+              const foods = [ "Black Pork (Heuk Dwaeji)",
+                  "Abalone (Jeonbok)",
+                  "Jeju Tangerines",
+                  "Seaweed Soup (Miyeok-guk)",
+                  "Hallabong Orange"
+            ]
+            onInteract(app, ui_el, "Table contains many delicious Korean foods: " + foods.join(","));
+          }
+          
 
         }
       }

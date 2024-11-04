@@ -11,6 +11,25 @@ export const createTable = (app, mapBounds) => {
 }
 
 export const ROOM_CONFIGS = {
+    "Home": {
+        interactives: [
+            {
+                sprite: 'bed',
+                uid: 'bed',
+                position: 'center top right',
+                type: "info",
+                scale: 2
+            },
+            { 
+                sprite: 'gf',
+                uid: 'gf',
+                position: 'center top left',
+                type: "info",
+                scale: 3
+            }
+
+        ]
+    },
     "Seoul": {
         interactives: [ 
             {
@@ -21,30 +40,28 @@ export const ROOM_CONFIGS = {
             },
             {
                 sprite: 'fhanbok',
-                x: 1050,
-                y: 300,
+                uid: 'fhanbok',
+                position: 'center top right',
                 type: "info",
             },
             {
                 sprite: 'mhanbok',
-                x: 1050,
-                y: 400,
+                position: 'center left',
                 scale: 2,
                 type: "info",
             },
             {
                 //from right to left, kimchi, korean chicken wings, Samgyeopsal, Tteokbokki
                 sprite: 'tableseoul',
-                x: 150+500,
-                y: 650,
+                position: 'center bot',
+                uid: 'tableseoul',
                 scale: 3,
                 type: "info",
             },
 
             {
                 sprite: 'myeongdong',
-                x: 500+500,
-                y: 550,
+                position: 'center right',
                 type: "info",
             }
             
@@ -52,27 +69,24 @@ export const ROOM_CONFIGS = {
     },
     "Busan": {
         interactives: [
-            {
-                sprite: 'meat',
-                x: 500+500,
-                y: 500,
-                scale: 2,
-                interaction: "different message",
-                type: "info",
-            },
-            {
-                sprite: 'meat',
-                x: 175+500,
-                y: 400,
-                scale: 2,
-                type: "info",
-            },
             // from left to right "Sashimi (Hoe)", "Grilled Eel (Jangeo-gui)",
             // "Busan-style Dwaeji Gukbap", "Bindaetteok (Mung Bean Pancakes)"
             {
+                uid: 'tablebusan',
                 sprite: 'tablebusan',
-                x: 150+500,
-                y: 650,
+                position: 'center bot',
+                scale: 3,
+                type: "info",
+            },
+            {
+                sprite: 'busan-boat',
+                position: 'center right',
+                scale: 3,
+                type: "info",
+            },
+            {
+                sprite: 'busan-zombie',
+                position: 'center left',
                 scale: 3,
                 type: "info",
             }
@@ -81,12 +95,18 @@ export const ROOM_CONFIGS = {
     "Jeju Island": {
         interactives: [
             {
-                sprite: 'meat',
-                x: 175+500,
-                y: 400,
+                sprite: 'palm',
+                uid: 'palm',
+                position: 'center left',
                 scale: 2,
                 type: "info",
             },
+            {
+                sprite: 'table-jeju',
+                uid: 'tablejeju',
+                position: 'center bot',
+                type: "info",
+            }
 
         ]
     }
@@ -113,23 +133,4 @@ export function cleanup(layer) {
 }
 
 
-export function updateRoom(option, layers) {
-    const roomConfig = ROOM_CONFIGS[option];
-    if (!roomConfig) {
-        console.warn(`No configuration found for option: ${option}`);
-        return;
-    }
-
-    if (roomConfig.interactives) {
-        for (const interactive of roomConfig.interactives) {
-            const sprite = Sprite.from(interactive.sprite);
-            sprite.anchor.set(0.5);
-            sprite.position.set(interactive.x, interactive.y);
-            if (interactive.scale) {
-                sprite.scale.set(interactive.scale);
-            }
-            layers.ui.addChild(sprite);
-        }
-    }
-}
 

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { ROOM_CONFIGS, updateRoom, cleanup } from './roomUpdates.js'
+import { ROOM_CONFIGS, cleanup } from './roomUpdates.js'
 
 const DEFAULT_RECT_OPTIONS = {
     x: 0, y: 0, width: 150, height: 100, borderRadius: 0
@@ -113,7 +113,6 @@ export class KoreaMap {
             return;
         }
 
-        updateRoom(option, layers);
 
         this.app.renderer.render(this.app.stage);
 
@@ -145,12 +144,32 @@ export class KoreaMap {
                 }
                 if(interactive.position) {
                     switch (interactive.position) {
-                        case 'top center': {
-                           sprite.position.set(app.canvas.width / 2,app.canvas.height - mapBounds.height);
+                        case 'center top': {
+                           sprite.position.set(this.app.canvas.width / 2,this.app.canvas.height - this.mapBounds.height);
                         } break;
-                        case 'bot center': {
-                           sprite.position.set(app.canvas.width / 2, 10);
+                        case 'center top left': {
+                           sprite.position.set(this.mapBounds.x + 100, this.app.canvas.height - this.mapBounds.height);
                         } break;
+                        case 'center top right': {
+                           sprite.position.set(this.mapBounds.x + this.mapBounds.width - 50, this.mapBounds.y + 100);
+                        } break;
+                        case 'center bot': {
+                           sprite.position.set(this.app.centerX, this.mapBounds.bottom);
+                        } break;
+                        case 'center': {
+                           console.log(this.app.centerX, this.app.centerY)
+                           sprite.position.set(this.app.centerX , this.app.centerY);
+                        } break;
+                        case 'center left': {
+                           sprite.position.set(this.mapBounds.left + 100, this.app.centerY);
+                        } break;
+                        case 'center right': {
+                           sprite.position.set(this.mapBounds.right - 100, this.app.centerY);
+                        } break;
+                        
+                        default: 
+                            console.warn('not a valid position')
+                            break;
                     }
                 } else {
                     sprite.position.set(interactive.x,interactive.y)
@@ -163,15 +182,7 @@ export class KoreaMap {
                     //sprite.interactionMessage = roomConfig.interactive.interaction;
                     //
                     layers.ui.addChild(sprite);
-                } else if (interactive.type == 'map') {
-    //                const koreaMap = new KoreaMap(app, ({ name }) => {
-    //                    onRoomUpdate(layers, name, mapBounds, app);
-    //                });
-    //
-    //                layers.ui.addChild(sprite);
-    //                layers.ui.addChild(koreaMap.rectangleSprite);
-                    //sprite.interactionMessage = roomConfig.interactive.interaction;
-                }
+                } 
 
             }
 
@@ -299,4 +310,3 @@ export const createRectangle = (app, {
     rectangleSprite.anchor.set(0.5)
     return rectangleSprite
 }
-
